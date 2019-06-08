@@ -117,9 +117,9 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <forum></forum>
-    <website></website>
+    <website>https://github.com/xbmc/metadata.themoviedb.org.python</website>
     <email></email>
-    <source></source>
+    <source>https://github.com/xbmc/metadata.themoviedb.org.python</source>
     <assets>
       <icon>icon.png</icon>
     </assets>

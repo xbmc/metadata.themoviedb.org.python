@@ -13,6 +13,8 @@
              language="en"
              library="scraper.py"/>
   <extension point="xbmc.addon.metadata">
+    <news>v0.5.0 (2019-??-??)
+- first Python version</news>
     <summary lang="af">TMDB Fliek Skraper</summary>
     <summary lang="be">TMDB Movie Scraper</summary>
     <summary lang="bg">Сваля инф. за филми от TMDB</summary>

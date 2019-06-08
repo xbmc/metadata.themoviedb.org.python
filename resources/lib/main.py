@@ -256,6 +256,7 @@ def find_id(nfo):
 
 def run():
     params=get_params()
+    enddir = True
     if 'action' in params:
         global tmdburls
         tmdburls=load_base_urls()
@@ -264,8 +265,11 @@ def run():
             add_movies(urllib.unquote_plus(params["title"]), params.get("year", None))
         elif action == 'getdetails' and 'url' in params:
             get_details(urllib.unquote_plus(params["url"]))
+            enddir = False
         elif action == 'getartwork' and 'id' in params:
-            add_artworks(urllib.unquote_plus(params["id"]))
+            add_artworks(unquote_plus(params["id"]))
+            enddir = False
         elif action == 'nfourl' and 'nfo' in params:
             find_id(urllib.unquote_plus(params["nfo"]))
-    xbmcplugin.endOfDirectory(HANDLE)
+    if enddir:
+        xbmcplugin.endOfDirectory(HANDLE)

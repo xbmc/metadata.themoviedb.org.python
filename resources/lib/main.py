@@ -142,15 +142,15 @@ def get_artworks(liz, movie):
     for img in movie.images['posters']:
         if img['iso_639_1'] == LANGUAGE:
             found = True
-            liz.addAvailableThumb(tmdburls['original']+img['file_path'], "poster")
+            liz.addAvailableArtwork(tmdburls['original']+img['file_path'], "poster")
     if LANGUAGE != 'en':
         for img in movie.images['posters']:
             if img['iso_639_1'] == 'en':
                 found = True
-                liz.addAvailableThumb(tmdburls['original']+img['file_path'], "poster")
+                liz.addAvailableArtwork(tmdburls['original']+img['file_path'], "poster")
     if not found:
         for img in movie.images['posters']:
-            liz.addAvailableThumb(tmdburls['original']+img['file_path'], "poster")
+            liz.addAvailableArtwork(tmdburls['original']+img['file_path'], "poster")
 
     if ADDON.getSetting('fanart') == 'true':
         fanarts=[]

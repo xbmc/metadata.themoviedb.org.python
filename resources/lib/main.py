@@ -6,8 +6,12 @@ import xbmcgui
 import xbmc
 import xbmcaddon
 import sys
-import urllib
-import urlparse
+try:
+    import urlparse
+    from urllib import unquote_plus
+except ModuleNotFoundError:
+    from urllib import parse as urlparse
+    from urllib.parse import unquote_plus
 import requests
 import re
 import resources.lib.tmdbsimple as tmdb
@@ -260,16 +264,16 @@ def run():
     if 'action' in params:
         global tmdburls
         tmdburls=load_base_urls()
-        action=urllib.unquote_plus(params["action"])
+        action = unquote_plus(params["action"])
         if action == 'find' and 'title' in params:
-            add_movies(urllib.unquote_plus(params["title"]), params.get("year", None))
+            add_movies(unquote_plus(params["title"]), params.get("year", None))
         elif action == 'getdetails' and 'url' in params:
-            get_details(urllib.unquote_plus(params["url"]))
+            get_details(unquote_plus(params["url"]))
             enddir = False
         elif action == 'getartwork' and 'id' in params:
             add_artworks(unquote_plus(params["id"]))
             enddir = False
         elif action == 'nfourl' and 'nfo' in params:
-            find_id(urllib.unquote_plus(params["nfo"]))
+            find_id(unquote_plus(params["nfo"]))
     if enddir:
         xbmcplugin.endOfDirectory(HANDLE)

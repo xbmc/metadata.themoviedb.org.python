@@ -13,7 +13,7 @@ import re
 import resources.lib.tmdbsimple as tmdb
 from datetime import datetime, timedelta
 
-tmdb.API_KEY = '6889f6089877fd092454d00edb44a84d'
+tmdb.API_KEY = 'f090bb54758cabf231fb605d3e3e0468'
 ADDON = xbmcaddon.Addon()
 ID = ADDON.getAddonInfo('id')
 LANGUAGE = ADDON.getSetting('language')

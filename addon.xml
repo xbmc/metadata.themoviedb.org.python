@@ -120,5 +120,8 @@
     <website></website>
     <email></email>
     <source></source>
+    <assets>
+      <icon>icon.png</icon>
+    </assets>
   </extension>
 </addon>

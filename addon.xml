@@ -119,7 +119,7 @@
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <forum></forum>
-    <website>https://github.com/xbmc/metadata.themoviedb.org.python</website>
+    <website>https://www.themoviedb.org</website>
     <email></email>
     <source>https://github.com/xbmc/metadata.themoviedb.org.python</source>
     <assets>

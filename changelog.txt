@@ -1,2 +1,3 @@
-v0.5.0 (2019-??-??)
+v0.5.0 (2019-06-09)
 - first Python version
+- early version mostly by @phate89, with an old version of tmdbsimple

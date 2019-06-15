@@ -119,7 +119,7 @@
     <description lang="zh_TW">themoviedb.org是一個免費和開放的電影資料庫。它是完全由與您一樣的廣大使用者來更新資訊。 TMDb目前擁有數以百萬計的使用人次並且有著強大的API，許多受歡迎的媒體中心平台像Kodi藉由TMDb獲取電影的數據資料庫，海報和影片資訊，以豐富使用者體驗。</description>
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
-    <forum></forum>
+    <forum>https://forum.kodi.tv/showthread.php?tid=344580</forum>
     <website>https://www.themoviedb.org</website>
     <email></email>
     <source>https://github.com/xbmc/metadata.themoviedb.org.python</source>

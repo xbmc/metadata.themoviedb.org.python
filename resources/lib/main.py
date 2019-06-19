@@ -175,6 +175,10 @@ def get_details(mid):
 
         imdb_info = get_imdb_ratinginfo(movie.imdb_id)
 
+        studios = get_names(movie.production_companies)
+        if not ADDON.getSettingBool('multiple_studios'):
+            studios = studios[:1]
+
         liz.setInfo('video',
             {'title': title,
                 'originaltitle': movie.original_title,
@@ -191,7 +195,7 @@ def get_details(mid):
                 'director': get_cast_members(movie.casts, 'crew', 'Directing', ['Director']),
                 'set': get_set(movie.belongs_to_collection) if \
                     movie.belongs_to_collection else get_set(movie_en.belongs_to_collection),
-                'studio': get_names(movie.production_companies),
+                'studio': studios,
                 'premiered': movie.release_date
         })
 

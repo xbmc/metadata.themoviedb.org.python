@@ -12,10 +12,11 @@ try:
 except ModuleNotFoundError:
     from urllib import parse as urlparse
     from urllib.parse import unquote_plus
-import requests
 import re
-import resources.lib.tmdbsimple as tmdb
 from datetime import datetime, timedelta
+
+import resources.lib.tmdbsimple as tmdb
+from resources.lib.imdbratings import get_imdb_ratinginfo
 
 tmdb.API_KEY = 'f090bb54758cabf231fb605d3e3e0468'
 ADDON = xbmcaddon.Addon()
@@ -119,22 +120,6 @@ def get_tmdb_movie(mid, getInfo=True, getTrailers=True, getReleases=True, getCas
     except:
         return None
 
-# get the movie info via imdb
-def get_imdb_info(id):
-    top250 = 0
-    votes = 0
-    rating = 0
-    r = requests.get('http://www.imdb.com/title/'+id+'/ratings')
-    if r.status_code == 200:
-        res = re.search(r'<p>(\d+).*?title\?user_rating\=.*?\">(.*?)</a>', r.text)
-        if (res):
-            votes = int(res.group(1).replace(',', ''))
-            rating = float(res.group(2))
-        res = re.search(r'\#(\d+).*?"/chart/top', r.text)
-        if (res):
-            top250 = res.group(1)
-    return {'votes': votes, 'rating': rating, 'top250': top250}
-
 # get the images from the movie info
 def get_artworks(liz, movie):
     found = False
@@ -188,7 +173,7 @@ def get_details(mid):
         elif parsetrailer:
             trailer = get_trailer(movie.trailers)
 
-        imdb_info = get_imdb_info(movie.imdb_id)
+        imdb_info = get_imdb_ratinginfo(movie.imdb_id)
 
         liz.setInfo('video',
             {'title': title,

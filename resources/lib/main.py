@@ -260,7 +260,7 @@ def run():
         elif action == 'getartwork' and 'id' in params:
             add_artworks(unquote_plus(params["id"]))
             enddir = False
-        elif action == 'nfourl' and 'nfo' in params:
+        elif action == 'NfoUrl' and 'nfo' in params:
             find_id(unquote_plus(params["nfo"]))
     if enddir:
         xbmcplugin.endOfDirectory(HANDLE)

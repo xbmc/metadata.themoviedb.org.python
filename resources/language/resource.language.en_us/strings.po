@@ -50,7 +50,8 @@ msgstr ""
 
 msgctxt "#30008"
 msgid "Certification Prefix"
-msgctxt "#30009"
+msgstr ""
 
+msgctxt "#30009"
 msgid "Add multiple studios"
 msgstr ""

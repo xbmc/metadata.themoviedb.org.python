@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="metadata.themoviedb.org.python"
        name="The Movie Database Python"
-       version="0.5.0"
+       version="0.6.0"
        provider-name="Team Kodi">
   <requires>
     <import addon="xbmc.metadata" version="2.1.0"/>
@@ -13,7 +13,14 @@
              language="en"
              library="scraper.py"/>
   <extension point="xbmc.addon.metadata">
-    <news>v0.5.0 (2019-06-09)
+    <news>v0.6.0 (2019-07-04)
+- Feature: add option to configure certification prefix
+- Feature: add option to return single or multiple studios
+- Feature: add movie set overview and artwork when scanning movies
+- Fix: IMDB top 250 and ratings
+- Fix: parsing NFO file for URL / ID
+
+v0.5.0 (2019-06-09)
 - first Python version
 - early version mostly by @phate89, with an old version of tmdbsimple</news>
     <summary lang="af_ZA">TMDB Fliek Skraper</summary>

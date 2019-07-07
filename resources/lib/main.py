@@ -60,17 +60,17 @@ def search_movies(title, year=None):
     return search.results
 
 # find the youtube trailer in the list
-def get_trailer(trailers):
-    if 'youtube' in trailers:
-        for trailer in trailers['youtube']:
-            return 'plugin://plugin.video.youtube/?action=play_video&videoid='+trailer['source']
+def get_trailer(trailers, trailers_en):
+    if trailers.get('youtube'):
+        return 'plugin://plugin.video.youtube/?action=play_video&videoid='+trailers['youtube'][0]['source']
+    if trailers_en.get('youtube'):
+        return 'plugin://plugin.video.youtube/?action=play_video&videoid='+trailers_en['youtube'][0]['source']
     return ''
 
-# find the set in the list
-def get_set(colls):
-    if colls and 'name' in colls:
-        return colls['name']
-    return ""
+def get_set_id(colls):
+    if colls and 'id' in colls:
+        return colls['id']
+    return None
 
 # helper function to get the names from a list of dictionaries
 def get_names(names):
@@ -120,111 +120,180 @@ def get_tmdb_movie(mid, getInfo=True, getTrailers=True, getReleases=True, getCas
     except:
         return None
 
-# get the images from the movie info
-def get_artworks(liz, movie):
-    found = False
-    for img in movie.images['posters']:
-        if img['iso_639_1'] == LANGUAGE:
-            found = True
-            liz.addAvailableArtwork(tmdburls['original']+img['file_path'], "poster")
+def get_tmdb_moviecollection(collection_id, language=None):
+    if not collection_id:
+        return None
+    collection = tmdb.Collections(collection_id)
+    try:
+        collection.info(language=language, append_to_response='images')
+        return collection
+    except:
+        return None
+
+def parse_artworks(movie, collection):
+    posters = [tmdburls['original'] + img['file_path']
+        for img in movie.images['posters']
+        if img['iso_639_1'] == LANGUAGE]
+
+    # Add backup English posters
     if LANGUAGE != 'en':
-        for img in movie.images['posters']:
-            if img['iso_639_1'] == 'en':
-                found = True
-                liz.addAvailableArtwork(tmdburls['original']+img['file_path'], "poster")
-    if not found:
-        for img in movie.images['posters']:
-            liz.addAvailableArtwork(tmdburls['original']+img['file_path'], "poster")
+        posters.extend(tmdburls['original'] + img['file_path']
+            for img in movie.images['posters']
+            if img['iso_639_1'] == 'en')
+
+    # Add any poster if nothing set so far
+    if not posters:
+        posters = [tmdburls['original'] + img['file_path']
+            for img in movie.images['posters']]
+
+    fanart = [{'image': tmdburls['original'] + img['file_path'],
+            'preview': tmdburls['preview'] + img['file_path']}
+        for img in movie.images['backdrops']]
+
+    setposters = []
+    if collection:
+        setposters = [tmdburls['original'] + img['file_path']
+            for img in collection.images['posters']
+            if img['iso_639_1'] == LANGUAGE]
+
+        # Add backup English posters
+        if LANGUAGE != 'en':
+            setposters.extend(tmdburls['original'] + img['file_path']
+                for img in collection.images['posters']
+                if img['iso_639_1'] == 'en')
+
+        # Add any poster if nothing set so far
+        if not setposters:
+            setposters = [tmdburls['original'] + img['file_path']
+                for img in collection.images['posters']]
+
+    setfanart = []
+    if collection:
+        setfanart = [tmdburls['original'] + img['file_path']
+            for img in collection.images['backdrops']]
+
+    return posters, fanart, setposters, setfanart
+
+IMAGE_LIMIT = 30
+
+# get the images from the movie info
+def get_artworks(liz, movie, collection):
+    posters, fanart, setposters, setfanart = parse_artworks(movie, collection)
+
+    postercount = 0
+    for poster in posters:
+        if postercount >= IMAGE_LIMIT:
+            break
+        liz.addAvailableArtwork(poster, "poster")
+        postercount += 1
+
+    setcount = 0
+    for poster in setposters:
+        if setcount >= IMAGE_LIMIT:
+            break
+        liz.addAvailableArtwork(poster, "set.poster")
+        setcount += 1
 
     if ADDON.getSetting('fanart') == 'true':
         fanarts = []
-        for img in movie.images['backdrops']:
-            fanarts.append({'image': tmdburls['original']+img['file_path'],
-                'preview': tmdburls['preview']+img['file_path']})
+        for f_art in fanart:
+            if len(fanart) >= IMAGE_LIMIT:
+                break
+            fanarts.append(f_art)
         liz.setAvailableFanart(fanarts)
+
+        setcount = 0
+        for f_art in setfanart:
+            if setcount >= IMAGE_LIMIT:
+                break
+            liz.addAvailableArtwork(f_art, "set.fanart")
+            setcount += 1
 
 # get the details of the found movie
 def get_details(mid):
     parsetrailer = ADDON.getSetting('trailer') == 'true'
     movie = get_tmdb_movie(mid, getImages=False, getTrailers=parsetrailer, language=LANGUAGE)
-    if movie:
-        if ADDON.getSetting('keeporiginaltitle') == 'true':
-            title = movie.original_title
-        else:
-            title = movie.title
-        liz = xbmcgui.ListItem(title, offscreen=True)
-        mpaa = ''
-        if 'countries' in movie.releases:
-            certprefix = ADDON.getSetting('certprefix')
-            certcountry = ADDON.getSetting('tmdbcertcountry').upper()
-            for c in movie.releases['countries']:
-                if c['iso_3166_1'] == certcountry and c['certification']:
-                    mpaa = certprefix + c['certification']
-                    break
+    if not movie:
+        return False
 
-        missingtrailer = (parsetrailer and not movie.trailers['youtube'])
+    imdb_info = get_imdb_ratinginfo(movie.imdb_id)
+    collection = get_tmdb_moviecollection(get_set_id(movie.belongs_to_collection), LANGUAGE) \
+        if movie.belongs_to_collection else None
 
-        # retrieve english version in case of a fallback and to get all the artworks
-        movie_en = get_tmdb_movie(mid, getTrailers=missingtrailer, getReleases=False, getCast=False)
+    # retrieve english version in case of a fallback and to get all the artworks
+    movie_en = get_tmdb_movie(mid, getTrailers=parsetrailer, getReleases=False, getCast=False)
+    collection_en = get_tmdb_moviecollection(get_set_id(movie.belongs_to_collection)) \
+        if movie.belongs_to_collection else None
 
-        trailer = ""
-        if missingtrailer:
-            trailer = get_trailer(movie_en.trailers)
-        elif parsetrailer:
-            trailer = get_trailer(movie.trailers)
+    return _get_details(movie, movie_en, imdb_info, collection, collection_en)
 
-        imdb_info = get_imdb_ratinginfo(movie.imdb_id)
+def _get_details(movie, movie_en, imdb_info, collection, collection_en):
+    if ADDON.getSetting('keeporiginaltitle') == 'true':
+        title = movie.original_title
+    else:
+        title = movie.title
+    liz = xbmcgui.ListItem(title, offscreen=True)
+    mpaa = ''
+    if 'countries' in movie.releases:
+        certprefix = ADDON.getSetting('certprefix')
+        certcountry = ADDON.getSetting('tmdbcertcountry').upper()
+        for c in movie.releases['countries']:
+            if c['iso_3166_1'] == certcountry and c['certification']:
+                mpaa = certprefix + c['certification']
+                break
 
-        studios = get_names(movie.production_companies)
-        if not ADDON.getSettingBool('multiple_studios'):
-            studios = studios[:1]
+    trailer = get_trailer(movie.trailers, movie_en.trailers) \
+        if hasattr(movie, 'trailers') else ''
 
-        liz.setInfo('video',
-            {'title': title,
-                'originaltitle': movie.original_title,
-                'top250': imdb_info['top250'],
-                'plot': movie.overview if movie.overview else movie_en.overview,
-                'tagline': movie.tagline if movie.tagline else movie_en.tagline,
-                'duration': movie.runtime * 60,
-                'mpaa': mpaa,
-                'trailer': trailer,
-                'genre': get_names(movie.genres),
-                'country': get_names(movie.production_countries),
-                'credits': get_cast_members(movie.casts, 'crew', 'Writing',
-                    ['Screenplay', 'Writer', 'Author']),
-                'director': get_cast_members(movie.casts, 'crew', 'Directing', ['Director']),
-                'set': get_set(movie.belongs_to_collection) if \
-                    movie.belongs_to_collection else get_set(movie_en.belongs_to_collection),
-                'studio': studios,
-                'premiered': movie.release_date
-        })
+    studios = get_names(movie.production_companies)
+    if not ADDON.getSettingBool('multiple_studios'):
+        studios = studios[:1]
 
-        if imdb_info['votes'] > 0:
-            imdbDef = ADDON.getSetting('RatingS') == 'IMDb'
-            liz.setRating("imdb", imdb_info['rating'], imdb_info['votes'], imdbDef)
-            liz.setRating("tmdb", movie.vote_average, movie.vote_count, not imdbDef)
-        else:
-            liz.setRating("tmdb", movie.vote_average, movie.vote_count, True)
-        liz.setUniqueIDs({'tmdb': movie.id, 'imdb': movie.imdb_id}, 'tmdb')
-        cast = []
-        if 'cast' in movie.casts:
-            for actor in movie.casts['cast']:
-                cast.append({'name': actor['name'],
-                    'role': actor['character'],
-                    'thumbnail': tmdburls['original']+actor['profile_path'] if actor['profile_path'] else "",
-                    'order': actor['order']})
-        liz.setCast(cast)
-        get_artworks(liz, movie_en)
-        liz.setProperty('video.date_added', '2016-01-01')
-        xbmcplugin.setResolvedUrl(handle=HANDLE, succeeded=True, listitem=liz)
+    if collection:
+        set_title = collection.name or collection_en.name
+        set_overview = collection.overview or collection_en.overview
+    else:
+        set_title = None
+        set_overview = None
 
-# add the found artworks to the list
-def add_artworks(mid):
-    movie_en = get_tmdb_movie(mid, getTrailers=False,
-        getReleases=False, getCast=False)
-    liz = xbmcgui.ListItem(movie.title, offscreen=True)
-    get_artworks(liz, movie_en)
+    liz.setInfo('video',
+        {'title': title,
+            'originaltitle': movie.original_title,
+            'top250': imdb_info['top250'],
+            'plot': movie.overview if movie.overview else movie_en.overview,
+            'tagline': movie.tagline if movie.tagline else movie_en.tagline,
+            'duration': movie.runtime * 60,
+            'mpaa': mpaa,
+            'trailer': trailer,
+            'genre': get_names(movie.genres),
+            'country': get_names(movie.production_countries),
+            'credits': get_cast_members(movie.casts, 'crew', 'Writing',
+                ['Screenplay', 'Writer', 'Author']),
+            'director': get_cast_members(movie.casts, 'crew', 'Directing', ['Director']),
+            'set': set_title,
+            'setoverview': set_overview,
+            'studio': studios,
+            'premiered': movie.release_date
+    })
+
+    if imdb_info['votes'] > 0:
+        imdbDef = ADDON.getSetting('RatingS') == 'IMDb'
+        liz.setRating("imdb", imdb_info['rating'], imdb_info['votes'], imdbDef)
+        liz.setRating("tmdb", movie.vote_average, movie.vote_count, not imdbDef)
+    else:
+        liz.setRating("tmdb", movie.vote_average, movie.vote_count, True)
+    liz.setUniqueIDs({'tmdb': movie.id, 'imdb': movie.imdb_id}, 'tmdb')
+    cast = []
+    for actor in movie.casts.get('cast', []):
+        cast.append({'name': actor['name'],
+            'role': actor['character'],
+            'thumbnail': tmdburls['original']+actor['profile_path'] if actor['profile_path'] else "",
+            'order': actor['order']})
+    liz.setCast(cast)
+    get_artworks(liz, movie_en, collection_en)
+
     xbmcplugin.setResolvedUrl(handle=HANDLE, succeeded=True, listitem=liz)
+    return True
 
 # find the id from the link if there is
 def get_id(nfo):
@@ -255,12 +324,12 @@ def run():
         if action == 'find' and 'title' in params:
             add_movies(unquote_plus(params["title"]), params.get("year", None))
         elif action == 'getdetails' and 'url' in params:
-            get_details(unquote_plus(params["url"]))
-            enddir = False
-        elif action == 'getartwork' and 'id' in params:
-            add_artworks(unquote_plus(params["id"]))
-            enddir = False
+            enddir = not get_details(unquote_plus(params["url"]))
         elif action == 'NfoUrl' and 'nfo' in params:
             find_id(unquote_plus(params["nfo"]))
+        else:
+            log("unhandled action: " + params['action'])
+    else:
+        log("No action in 'params' to act on")
     if enddir:
         xbmcplugin.endOfDirectory(HANDLE)

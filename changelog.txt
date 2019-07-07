@@ -1,3 +1,10 @@
+v0.6.0 (2019-07-04)
+- Feature: add setting to configure certification prefix
+- Feature: add option to return single or multiple studios
+- Feature: add movie set overview and artwork
+- Fix: IMDB top 250 and ratings
+- Fix: parsing NFO file for URL / ID
+
 v0.5.0 (2019-06-09)
 - first Python version
 - early version mostly by @phate89, with an old version of tmdbsimple

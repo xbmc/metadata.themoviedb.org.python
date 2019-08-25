@@ -11,7 +11,8 @@
   </requires>
   <extension point="xbmc.metadata.scraper.movies"
              language="en"
-             library="scraper.py"/>
+             library="python/scraper.py"/>
+  <!-- <extension point="xbmc.python.module" library="python/lib" /> -->
   <extension point="xbmc.addon.metadata">
     <news>v0.6.0 (2019-07-04)
 - Feature: add option to configure certification prefix

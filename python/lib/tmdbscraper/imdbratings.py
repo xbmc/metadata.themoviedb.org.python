@@ -12,9 +12,9 @@ IMDB_TOP250_REGEX = re.compile(r'Top Rated Movies #(\d+)')
 def get_details(uniqueids):
     imdb_id = _get_imdb_id(uniqueids)
     if not imdb_id:
-        return {}
+        return {}, None
     votes, rating, top250 = _get_ratinginfo(imdb_id)
-    return _assemble_imdb_result(votes, rating, top250)
+    return _assemble_imdb_result(votes, rating, top250), imdb_id
 
 def _get_imdb_id(uniqueids):
     imdb_id = uniqueids.get('imdb')

@@ -7,6 +7,7 @@ import xbmcplugin
 
 from lib.tmdbscraper.tmdb import TMDBMovieScraper
 from lib.tmdbscraper.imdbratings import get_details as get_imdb_details
+from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
 from scraper_datahelper import combine_scraped_details_info_and_ratings, configure_scraped_details, \
     find_uniqueids_in_text, get_params
 
@@ -70,12 +71,20 @@ def get_details(input_uniqueids, handle):
         log(header + ': ' + details['error'], xbmc.LOGWARNING)
         return False
 
-    imdbinfo = get_imdb_details(details['uniqueids'])
+    imdbinfo, imdb_id = get_imdb_details(details['uniqueids'])
     if 'error' in imdbinfo:
         header = "The Movie Database Python error with website IMDB"
         log(header + ': ' + imdbinfo['error'], xbmc.LOGWARNING)
     else:
         details = combine_scraped_details_info_and_ratings(details, imdbinfo)
+
+    if imdb_id:
+        traktinfo = get_trakt_ratinginfo(imdb_id)
+        if 'error' in traktinfo:
+            header = "The Movie Database Python error with website Trakt"
+            log(header + ': ' + traktinfo['error'], xbmc.LOGWARNING)
+        else:
+            details = combine_scraped_details_info_and_ratings(details, traktinfo)
 
     details = configure_scraped_details(details, ADDON)
 
@@ -86,7 +95,10 @@ def get_details(input_uniqueids, handle):
     add_artworks(listitem, details['available_art'])
 
     for rating_type, value in details['ratings'].items():
-        listitem.setRating(rating_type, value['rating'], value['votes'], value['default'])
+        if 'votes' in value:
+            listitem.setRating(rating_type, value['rating'], value['votes'], value['default'])
+        else:
+            listitem.setRating(rating_type, value['rating'], value['default'])
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True

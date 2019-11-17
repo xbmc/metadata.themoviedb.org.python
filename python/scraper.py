@@ -71,20 +71,15 @@ def get_details(input_uniqueids, handle):
         log(header + ': ' + details['error'], xbmc.LOGWARNING)
         return False
 
-    imdbinfo, imdb_id = get_imdb_details(details['uniqueids'])
+    imdbinfo = get_imdb_details(details['uniqueids'])
     if 'error' in imdbinfo:
         header = "The Movie Database Python error with website IMDB"
         log(header + ': ' + imdbinfo['error'], xbmc.LOGWARNING)
     else:
         details = combine_scraped_details_info_and_ratings(details, imdbinfo)
 
-    if imdb_id:
-        traktinfo = get_trakt_ratinginfo(imdb_id)
-        if 'error' in traktinfo:
-            header = "The Movie Database Python error with website Trakt"
-            log(header + ': ' + traktinfo['error'], xbmc.LOGWARNING)
-        else:
-            details = combine_scraped_details_info_and_ratings(details, traktinfo)
+    traktinfo = get_trakt_ratinginfo(details['uniqueids'])
+    details = combine_scraped_details_info_and_ratings(details, traktinfo)
 
     details = configure_scraped_details(details, ADDON)
 
@@ -98,7 +93,7 @@ def get_details(input_uniqueids, handle):
         if 'votes' in value:
             listitem.setRating(rating_type, value['rating'], value['votes'], value['default'])
         else:
-            listitem.setRating(rating_type, value['rating'], value['default'])
+            listitem.setRating(rating_type, value['rating'], defaultt=value['default'])
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True

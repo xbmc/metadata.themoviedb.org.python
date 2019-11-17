@@ -7,6 +7,7 @@ import xbmcplugin
 
 from lib.tmdbscraper.tmdb import TMDBMovieScraper
 from lib.tmdbscraper.imdbratings import get_details as get_imdb_details
+from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
 from scraper_datahelper import combine_scraped_details_info_and_ratings, configure_scraped_details, \
     find_uniqueids_in_text, get_params
 
@@ -77,6 +78,9 @@ def get_details(input_uniqueids, handle):
     else:
         details = combine_scraped_details_info_and_ratings(details, imdbinfo)
 
+    traktinfo = get_trakt_ratinginfo(details['uniqueids'])
+    details = combine_scraped_details_info_and_ratings(details, traktinfo)
+
     details = configure_scraped_details(details, ADDON)
 
     listitem = xbmcgui.ListItem(details['info']['title'], offscreen=True)
@@ -86,7 +90,10 @@ def get_details(input_uniqueids, handle):
     add_artworks(listitem, details['available_art'])
 
     for rating_type, value in details['ratings'].items():
-        listitem.setRating(rating_type, value['rating'], value['votes'], value['default'])
+        if 'votes' in value:
+            listitem.setRating(rating_type, value['rating'], value['votes'], value['default'])
+        else:
+            listitem.setRating(rating_type, value['rating'], defaultt=value['default'])
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True

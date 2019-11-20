@@ -8,6 +8,7 @@
     <import addon="xbmc.python" version="2.26.0"/>
     <import addon="script.module.requests" version="2.9.1"/>
     <import addon="script.module.trakt" version="3.1.0"/>
+    <import addon="script.module.tmdbsimple" version="2.2.0"/>
     <import addon="plugin.video.youtube" version="4.4.10" optional="true"/>
   </requires>
   <extension point="xbmc.metadata.scraper.movies"

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from requests.exceptions import ConnectionError as RequestsConnectionError, Timeout, RequestException
 
-from .external import tmdbsimple
+import tmdbsimple
 
 # Same key as built-in XML scraper
 tmdbsimple.API_KEY = 'f090bb54758cabf231fb605d3e3e0468'

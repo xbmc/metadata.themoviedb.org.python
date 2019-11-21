@@ -6,29 +6,6 @@ from python.lib.tmdbscraper import imdbratings
 # TODO: **requests** error handling in `_get_ratinginfo` is not covered
 
 class TestIMDBRatings(unittest.TestCase):
-    def test_get_imdbid_from_uniqueids(self):
-        input_model = {'imdb': 'tt1234', 'tmdb': '4321'}
-        expected_output = 'tt1234'
-
-        actual_output = imdbratings._get_imdb_id(input_model)
-
-        self.assertEqual(expected_output, actual_output)
-
-    def test_get_imdbid_from_uniqueids__no_imdb(self):
-        input_model = {'tmdb': '4321'}
-
-        actual_output = imdbratings._get_imdb_id(input_model)
-
-        self.assertIsNone(actual_output)
-
-    def test_get_imdbid_from_uniqueids__malformed_imdb(self):
-        input_model = {'imdb': '4321'}
-
-        actual_output = imdbratings._get_imdb_id(input_model)
-
-        self.assertIsNone(actual_output)
-
-
     def test_parse_imdb_page__goldenpath_2019_08(self):
         # region large `input_model` golden path IMDB page
         input_model = '''

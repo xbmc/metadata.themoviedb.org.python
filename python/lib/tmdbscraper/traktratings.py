@@ -1,6 +1,7 @@
-from lib.tmdbscraper import get_imdb_id
 from trakt import Trakt
 from trakt.objects import Movie
+
+from . import get_imdb_id
 
 # get the movie info via imdb
 def get_trakt_ratinginfo(uniqueids):

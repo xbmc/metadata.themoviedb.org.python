@@ -8,8 +8,8 @@ import xbmcplugin
 from lib.tmdbscraper.tmdb import TMDBMovieScraper
 from lib.tmdbscraper.imdbratings import get_details as get_imdb_details
 from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
-from scraper_datahelper import combine_scraped_details_info_and_ratings, configure_scraped_details, \
-    find_uniqueids_in_text, get_params
+from scraper_datahelper import combine_scraped_details_info_and_ratings, find_uniqueids_in_text, get_params
+from scraper_config import configure_scraped_details
 
 ADDON = xbmcaddon.Addon()
 ID = ADDON.getAddonInfo('id')

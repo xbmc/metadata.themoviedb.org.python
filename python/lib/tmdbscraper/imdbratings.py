@@ -1,7 +1,8 @@
 import re
 import requests
-from lib.tmdbscraper import get_imdb_id
 from requests.exceptions import ConnectionError as RequestsConnectionError, Timeout, RequestException
+
+from . import get_imdb_id
 
 IMDB_RATINGS_URL = 'https://www.imdb.com/title/{}/'
 

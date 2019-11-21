@@ -44,12 +44,14 @@ class TMDBMovieScraper(object):
         details = self._gather_details(media_id)
         if not details:
             return None
-        return self._assemble_details(*details)
+        if details.get('error'):
+            return details
+        return self._assemble_details(**details)
 
     def _gather_details(self, media_id):
         movie = _get_movie(media_id, self.language)
-        if not movie:
-            return None
+        if not movie or movie.get('error'):
+            return movie
 
         # don't specify language to get all the artworks and English text for fallback
         movie_fallback = _get_movie(media_id)
@@ -59,7 +61,8 @@ class TMDBMovieScraper(object):
         collection_fallback = _get_moviecollection(movie['belongs_to_collection'].get('id')) if \
             movie['belongs_to_collection'] else None
 
-        return movie, movie_fallback, collection, collection_fallback
+        return {'movie': movie, 'movie_fallback': movie_fallback, 'collection': collection,
+            'collection_fallback': collection_fallback}
 
     def _assemble_details(self, movie, movie_fallback, collection, collection_fallback):
         info = {

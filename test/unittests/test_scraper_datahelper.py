@@ -151,13 +151,13 @@ class TestScraperDatahelper(unittest.TestCase):
 
 
     def test_configure_default_rating__imdb(self):
-        input_details = {'ratings': {'imdb': {'rating': 1, 'votes': 2}, 'tmdb': {'rating': 1.1, 'votes': 3}}}
+        input_details = {'ratings': {'imdb': {'rating': 1, 'votes': 2}, 'themoviedb': {'rating': 1.1, 'votes': 3}}}
         input_settings = MagicMock(spec=['getSetting'])
         input_settings.getSetting.return_value = 'IMDb'
 
         expected_output = {'ratings': {
             'imdb': {'rating': 1, 'votes': 2, 'default': True},
-            'tmdb': {'rating': 1.1, 'votes': 3, 'default': False}
+            'themoviedb': {'rating': 1.1, 'votes': 3, 'default': False}
         }}
 
         actual_output = scraper_datahelper._configure_default_rating(input_details, input_settings)
@@ -166,12 +166,12 @@ class TestScraperDatahelper(unittest.TestCase):
         input_settings.getSetting.assert_called_once_with('RatingS')
 
     def test_configure_default_rating__imdb_no_imdb_fallback_to_tmdb(self):
-        input_details = {'ratings': {'tmdb': {'rating': 1.2, 'votes': 4}}}
+        input_details = {'ratings': {'themoviedb': {'rating': 1.2, 'votes': 4}}}
         input_settings = MagicMock(spec=['getSetting'])
         input_settings.getSetting.return_value = 'IMDb'
 
         expected_output = {'ratings': {
-            'tmdb': {'rating': 1.2, 'votes': 4, 'default': True}
+            'themoviedb': {'rating': 1.2, 'votes': 4, 'default': True}
         }}
 
         actual_output = scraper_datahelper._configure_default_rating(input_details, input_settings)
@@ -179,13 +179,13 @@ class TestScraperDatahelper(unittest.TestCase):
         self.assertDictEqual(expected_output['ratings'], actual_output['ratings'])
 
     def test_configure_default_rating__tmdb(self):
-        input_details = {'ratings': {'imdb': {'rating': 1, 'votes': 5}, 'tmdb': {'rating': 1.3, 'votes': 6}}}
+        input_details = {'ratings': {'imdb': {'rating': 1, 'votes': 5}, 'themoviedb': {'rating': 1.3, 'votes': 6}}}
         input_settings = MagicMock(spec=['getSetting'])
         input_settings.getSetting.return_value = 'TMDb'
 
         expected_output = {'ratings': {
             'imdb': {'rating': 1, 'votes': 5, 'default': False},
-            'tmdb': {'rating': 1.3, 'votes': 6, 'default': True}
+            'themoviedb': {'rating': 1.3, 'votes': 6, 'default': True}
         }}
 
         actual_output = scraper_datahelper._configure_default_rating(input_details, input_settings)

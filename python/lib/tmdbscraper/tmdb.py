@@ -85,7 +85,7 @@ class TMDBMovieScraper(object):
         if movie.get('runtime'):
             info['duration'] = movie['runtime'] * 60
 
-        ratings = {'tmdb': {'rating': movie['vote_average'], 'votes': movie['vote_count']}}
+        ratings = {'themoviedb': {'rating': float(movie['vote_average']), 'votes': int(movie['vote_count'])}}
         uniqueids = {'tmdb': movie['id'], 'imdb': movie['imdb_id']}
         cast = [{
                 'name': actor['name'],

@@ -61,5 +61,5 @@ def _parse_imdb_top250(input_html):
 def _format_error_message(ex):
     message = type(ex).__name__
     if hasattr(ex, 'message'):
-        message += ": " + ex.message
+        message += ": {0}".format(ex.message)
     return {'error': message}

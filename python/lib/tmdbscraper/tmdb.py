@@ -40,7 +40,7 @@ class TMDBMovieScraper(object):
         return result
 
     def get_details(self, uniqueids):
-        media_id = uniqueids.get('imdb') or uniqueids.get('tmdb')
+        media_id = uniqueids.get('tmdb') or uniqueids.get('imdb')
         details = self._gather_details(media_id)
         if not details:
             return None
@@ -86,7 +86,7 @@ class TMDBMovieScraper(object):
                     info['mpaa'] = certprefix + country['certification']
                     break
 
-        trailer = _get_trailer(movie.get('trailers', {}), movie_fallback.get('trailers', {}))
+        trailer = _parse_trailer(movie.get('trailers', {}), movie_fallback.get('trailers', {}))
         if trailer:
             info['trailer'] = trailer
         if collection:
@@ -194,7 +194,7 @@ def _load_base_urls(settings):
             settings.setSetting('lastUpdated', str(_get_date_numeric(datetime.now())))
     return urls
 
-def _get_trailer(trailers, fallback):
+def _parse_trailer(trailers, fallback):
     if trailers.get('youtube'):
         return 'plugin://plugin.video.youtube/?action=play_video&videoid='+trailers['youtube'][0]['source']
     if fallback.get('youtube'):
@@ -215,5 +215,5 @@ def _get_cast_members(casts, casttype, department, jobs):
 def _format_error_message(ex):
     message = type(ex).__name__
     if hasattr(ex, 'message'):
-        message += ": " + ex.message
+        message += ": {0}".format(ex.message)
     return {'error': message}

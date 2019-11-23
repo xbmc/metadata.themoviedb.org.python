@@ -18,7 +18,7 @@ LANGUAGE = ADDON.getSetting('language')
 scraper = TMDBMovieScraper(ADDON, LANGUAGE)
 
 def log(msg, level=xbmc.LOGDEBUG):
-    xbmc.log(msg='{addon}: {msg}'.format(addon=ID, msg=msg), level=level)
+    xbmc.log(msg='[{addon}]: {msg}'.format(addon=ID, msg=msg), level=level)
 
 def search_for_movie(title, year, handle):
     log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
@@ -34,13 +34,13 @@ def search_for_movie(title, year, handle):
 
     for movie in search_results:
         listitem = xbmcgui.ListItem(movie['title'], offscreen=True)
-        movie_year = movie.get('release_date', '')[0]
+        movie_year = movie['release_date'].split('-')[0] if movie.get('release_date') else None
         if movie_year:
             listitem.setInfo('video', {'year': movie_year})
         if movie['poster_path']:
             listitem.setArt({'thumb': movie['poster_path']})
         uniqueids = {'tmdb': str(movie['id'])}
-        xbmcplugin.addDirectoryItem(handle=handle, url=json.dumps(uniqueids),
+        xbmcplugin.addDirectoryItem(handle=handle, url=build_lookup_string(uniqueids),
             listitem=listitem, isFolder=True)
 
 _articles = [prefix + article for prefix in (', ', ' ') for article in ("the", "a", "an")]
@@ -112,7 +112,14 @@ def find_uniqueids_in_nfo(nfo, handle):
     uniqueids = find_uniqueids_in_text(nfo)
     if uniqueids:
         listitem = xbmcgui.ListItem(offscreen=True)
-        xbmcplugin.addDirectoryItem(handle=handle, url=json.dumps(uniqueids), listitem=listitem, isFolder=True)
+        xbmcplugin.addDirectoryItem(
+            handle=handle, url=build_lookup_string(uniqueids), listitem=listitem, isFolder=True)
+
+def build_lookup_string(uniqueids):
+    return json.dumps(uniqueids)
+
+def parse_lookup_string(uniqueids):
+    return json.loads(uniqueids)
 
 def run():
     params = get_params(sys.argv[1:])
@@ -122,7 +129,7 @@ def run():
         if action == 'find' and 'title' in params:
             search_for_movie(params["title"], params.get("year"), params['handle'])
         elif action == 'getdetails' and 'url' in params:
-            enddir = not get_details(json.loads(params["url"]), params['handle'])
+            enddir = not get_details(parse_lookup_string(params["url"]), params['handle'])
         elif action == 'NfoUrl' and 'nfo' in params:
             find_uniqueids_in_nfo(params["nfo"], params['handle'])
         else:

@@ -21,7 +21,8 @@ def log(msg, level=xbmc.LOGDEBUG):
     xbmc.log(msg='{addon}: {msg}'.format(addon=ID, msg=msg), level=level)
 
 def search_for_movie(title, year, handle):
-    log('Find movie with title {title} from year {year}'.format(title=title, year=year), xbmc.LOGINFO)
+    log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
+    title = _strip_trailing_article(title)
     search_results = scraper.search(title, year)
     if not search_results:
         return
@@ -40,6 +41,14 @@ def search_for_movie(title, year, handle):
         uniqueids = {'tmdb': str(movie['id'])}
         xbmcplugin.addDirectoryItem(handle=handle, url=json.dumps(uniqueids),
             listitem=listitem, isFolder=True)
+
+_articles = [prefix + article for prefix in (', ', ' ') for article in ("the", "a", "an")]
+def _strip_trailing_article(title):
+    title = title.lower()
+    for article in _articles:
+        if title.endswith(article):
+            return title[:-len(article)]
+    return title
 
 # Low limit because a big list of artwork can cause trouble in some cases
 # (a column can be too large for the MySQL integration),

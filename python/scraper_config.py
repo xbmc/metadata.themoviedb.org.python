@@ -7,7 +7,7 @@ def configure_scraped_details(details, settings):
 
 def _configure_keeporiginaltitle(details, settings):
     if settings.getSettingBool('keeporiginaltitle'):
-        details['info']['title'] = details['info']['original_title']
+        details['info']['title'] = details['info']['originaltitle']
     return details
 
 def _configure_trailer(details, settings):

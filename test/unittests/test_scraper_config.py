@@ -8,7 +8,7 @@ class TestScraperConfig(unittest.TestCase):
     def test_configure_keeporiginaltitle__true(self):
         original_title = "*original title of a movie"
         input_details = {'info': {'title': "title of a movie",
-            'original_title': original_title}}
+            'originaltitle': original_title}}
         input_settings = MagicMock(spec=['getSettingBool'])
         input_settings.getSettingBool.return_value = True
 
@@ -22,7 +22,7 @@ class TestScraperConfig(unittest.TestCase):
     def test_configure_keeporiginaltitle__false(self):
         title = "title of a movie"
         input_details = {'info': {'title': title,
-            'original_title': "*original title of a movie"}}
+            'originaltitle': "*original title of a movie"}}
         input_settings = MagicMock(spec=['getSettingBool'])
         input_settings.getSettingBool.return_value = False
 

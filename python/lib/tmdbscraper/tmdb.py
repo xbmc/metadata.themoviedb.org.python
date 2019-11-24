@@ -19,11 +19,18 @@ class TMDBMovieScraper(object):
         return self._urls
 
     def search(self, title, year=None):
-        try:
-            response = tmdbsimple.Search().movie(query=title, year=year, language=self.language)
-        except (Timeout, RequestsConnectionError, RequestException) as ex:
-            return _format_error_message(ex)
-        result = response['results']
+        search_media_id = _parse_media_id(title)
+        if search_media_id:
+            result = _get_movie(search_media_id, self.language, True)
+            if 'error' in result:
+                return result
+            result = [result]
+        else:
+            try:
+                response = tmdbsimple.Search().movie(query=title, year=year, language=self.language)
+            except (Timeout, RequestsConnectionError, RequestException) as ex:
+                return _format_error_message(ex)
+            result = response['results']
         urls = self.urls
         for item in result:
             if item.get('poster_path'):
@@ -101,8 +108,17 @@ class TMDBMovieScraper(object):
         return {'info': info, 'ratings': ratings, 'uniqueids': uniqueids, 'cast': cast,
             'available_art': available_art}
 
-def _get_movie(mid, language=None):
-    details = 'trailers,releases,casts,' if language is not None else 'trailers,images'
+def _parse_media_id(title):
+    if title.startswith('tt') and title[2:].isdigit():
+        return title # IMDB ID works alone because it is clear
+    title = title.lower()
+    if (title.startswith('tmdb/') and title[5:].isdigit() or # TMDB ID
+            title.startswith('imdb/tt') and title[7:].isdigit()): # IMDB ID with prefix to match
+        return title[5:]
+    return None
+
+def _get_movie(mid, language=None, search=False):
+    details = None if search else 'trailers,releases,casts,' if language is not None else 'trailers,images'
     movie = tmdbsimple.Movies(mid)
     try:
         return movie.info(language=language, append_to_response=details)

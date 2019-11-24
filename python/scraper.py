@@ -34,8 +34,9 @@ def search_for_movie(title, year, handle):
 
     for movie in search_results:
         listitem = xbmcgui.ListItem(movie['title'], offscreen=True)
-        if year:
-            listitem.setInfo('video', {'year': year})
+        movie_year = movie.get('release_date', '')[0]
+        if movie_year:
+            listitem.setInfo('video', {'year': movie_year})
         if movie['poster_path']:
             listitem.setArt({'thumb': movie['poster_path']})
         uniqueids = {'tmdb': str(movie['id'])}

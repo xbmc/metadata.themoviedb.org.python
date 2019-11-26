@@ -7,15 +7,16 @@ from .external import tmdbsimple
 tmdbsimple.API_KEY = 'f090bb54758cabf231fb605d3e3e0468'
 
 class TMDBMovieScraper(object):
-    def __init__(self, source_settings, language):
-        self.settings = source_settings
+    def __init__(self, url_settings, language, certification_country):
+        self.url_settings = url_settings
         self.language = language
+        self.certification_country = certification_country
         self._urls = None
 
     @property
     def urls(self):
         if not self._urls:
-            self._urls = _load_base_urls(self.settings)
+            self._urls = _load_base_urls(self.url_settings)
         return self._urls
 
     def search(self, title, year=None):
@@ -79,11 +80,10 @@ class TMDBMovieScraper(object):
         }
 
         if 'countries' in movie['releases']:
-            certprefix = self.settings.getSetting('certprefix')
-            certcountry = self.settings.getSetting('tmdbcertcountry').upper()
+            certcountry = self.certification_country.upper()
             for country in movie['releases']['countries']:
                 if country['iso_3166_1'] == certcountry and country['certification']:
-                    info['mpaa'] = certprefix + country['certification']
+                    info['mpaa'] = country['certification']
                     break
 
         trailer = _parse_trailer(movie.get('trailers', {}), movie_fallback.get('trailers', {}))
@@ -178,20 +178,20 @@ def _get_images(imagelist, urlbases, language=None):
 def _get_date_numeric(datetime_):
     return (datetime_ - datetime(1970, 1, 1)).total_seconds()
 
-def _load_base_urls(settings):
+def _load_base_urls(url_settings):
     urls = {}
-    urls['original'] = settings.getSetting('originalUrl')
-    urls['preview'] = settings.getSetting('previewUrl')
-    last_updated = settings.getSetting('lastUpdated')
+    urls['original'] = url_settings.getSetting('originalUrl')
+    urls['preview'] = url_settings.getSetting('previewUrl')
+    last_updated = url_settings.getSetting('lastUpdated')
     if not urls['original'] or not urls['preview'] or not last_updated or \
             float(last_updated) < _get_date_numeric(datetime.now() - timedelta(days=30)):
         conf = tmdbsimple.Configuration().info()
         if conf:
             urls['original'] = conf['images']['base_url'] + 'original'
             urls['preview'] = conf['images']['base_url'] + 'w780'
-            settings.setSetting('originalUrl', urls['original'])
-            settings.setSetting('previewUrl', urls['preview'])
-            settings.setSetting('lastUpdated', str(_get_date_numeric(datetime.now())))
+            url_settings.setSetting('originalUrl', urls['original'])
+            url_settings.setSetting('previewUrl', urls['preview'])
+            url_settings.setSetting('lastUpdated', str(_get_date_numeric(datetime.now())))
     return urls
 
 def _parse_trailer(trailers, fallback):

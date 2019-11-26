@@ -11,19 +11,21 @@ from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
 from scraper_datahelper import combine_scraped_details_info_and_ratings, find_uniqueids_in_text, get_params
 from scraper_config import configure_scraped_details
 
-ADDON = xbmcaddon.Addon()
-ID = ADDON.getAddonInfo('id')
-LANGUAGE = ADDON.getSetting('language')
-
-scraper = TMDBMovieScraper(ADDON, LANGUAGE)
+ADDON_SETTINGS = xbmcaddon.Addon()
+ID = ADDON_SETTINGS.getAddonInfo('id')
 
 def log(msg, level=xbmc.LOGDEBUG):
     xbmc.log(msg='[{addon}]: {msg}'.format(addon=ID, msg=msg), level=level)
 
-def search_for_movie(title, year, handle):
+def get_tmdb_scraper(settings):
+    language = settings.getSettingString('language')
+    certcountry = settings.getSettingString('tmdbcertcountry')
+    return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry)
+
+def search_for_movie(title, year, handle, settings):
     log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
     title = _strip_trailing_article(title)
-    search_results = scraper.search(title, year)
+    search_results = get_tmdb_scraper(settings).search(title, year)
     if not search_results:
         return
     if 'error' in search_results:
@@ -56,14 +58,14 @@ def _strip_trailing_article(title):
 # and how useful is a big list anyway? Not exactly rhetorical, this is an experiment.
 IMAGE_LIMIT = 10
 
-def add_artworks(listitem, artworks):
+def add_artworks(listitem, artworks, settings):
     for poster in artworks['poster'][:IMAGE_LIMIT]:
         listitem.addAvailableArtwork(poster['url'], "poster", poster['preview'])
 
     for poster in artworks['set.poster'][:IMAGE_LIMIT]:
         listitem.addAvailableArtwork(poster['url'], "set.poster", poster['preview'])
 
-    if ADDON.getSettingBool('fanart'):
+    if settings.getSettingBool('fanart'):
         fanart_to_set = [{'image': image['url'], 'preview': image['preview']}
             for image in artworks['fanart'][:IMAGE_LIMIT]]
         listitem.setAvailableFanart(fanart_to_set)
@@ -71,8 +73,8 @@ def add_artworks(listitem, artworks):
         for fanart in artworks['set.fanart'][:IMAGE_LIMIT]:
             listitem.addAvailableArtwork(fanart['url'], "set.fanart", fanart['preview'])
 
-def get_details(input_uniqueids, handle):
-    details = scraper.get_details(input_uniqueids)
+def get_details(input_uniqueids, handle, settings):
+    details = get_tmdb_scraper(settings).get_details(input_uniqueids)
     if not details:
         return False
     if 'error' in details:
@@ -91,13 +93,13 @@ def get_details(input_uniqueids, handle):
     traktinfo = get_trakt_ratinginfo(details['uniqueids'])
     details = combine_scraped_details_info_and_ratings(details, traktinfo)
 
-    details = configure_scraped_details(details, ADDON)
+    details = configure_scraped_details(details, settings)
 
     listitem = xbmcgui.ListItem(details['info']['title'], offscreen=True)
     listitem.setInfo('video', details['info'])
     listitem.setCast(details['cast'])
     listitem.setUniqueIDs(details['uniqueids'], 'tmdb')
-    add_artworks(listitem, details['available_art'])
+    add_artworks(listitem, details['available_art'], settings)
 
     for rating_type, value in details['ratings'].items():
         if 'votes' in value:
@@ -125,11 +127,12 @@ def run():
     params = get_params(sys.argv[1:])
     enddir = True
     if 'action' in params:
+        settings = ADDON_SETTINGS
         action = params["action"]
         if action == 'find' and 'title' in params:
-            search_for_movie(params["title"], params.get("year"), params['handle'])
+            search_for_movie(params["title"], params.get("year"), params['handle'], settings)
         elif action == 'getdetails' and 'url' in params:
-            enddir = not get_details(parse_lookup_string(params["url"]), params['handle'])
+            enddir = not get_details(parse_lookup_string(params["url"]), params['handle'], settings)
         elif action == 'NfoUrl' and 'nfo' in params:
             find_uniqueids_in_nfo(params["nfo"], params['handle'])
         else:

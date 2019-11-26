@@ -1,8 +1,14 @@
 def configure_scraped_details(details, settings):
+    details = _configure_rating_prefix(details, settings)
     details = _configure_keeporiginaltitle(details, settings)
     details = _configure_trailer(details, settings)
     details = _configure_multiple_studios(details, settings)
     details = _configure_default_rating(details, settings)
+    return details
+
+def _configure_rating_prefix(details, settings):
+    if details['info'].get('mpaa'):
+        details['info']['mpaa'] = settings.getSettingString('certprefix') + details['info']['mpaa']
     return details
 
 def _configure_keeporiginaltitle(details, settings):

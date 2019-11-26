@@ -5,6 +5,29 @@ from unittest.mock import MagicMock
 from python import scraper_config
 
 class TestScraperConfig(unittest.TestCase):
+    def test_configure_rating_prefix(self):
+        input_details = {'info': {'mpaa': "smash"}}
+        input_settings = MagicMock(spec=['getSettingString'])
+        input_settings.getSettingString.return_value = "prefix-"
+
+        expected_output = {'info': {'mpaa': "prefix-smash"}}
+
+        actual_output = scraper_config._configure_rating_prefix(input_details, input_settings)
+
+        self.assertEqual(expected_output['info']['mpaa'], actual_output['info']['mpaa'])
+        input_settings.getSettingString.assert_called_once_with('certprefix')
+
+    def test_configure_rating_prefix__no_rating(self):
+        input_details = {'info': {}}
+        input_settings = MagicMock()
+
+        expected_output = {'info': {}}
+
+        actual_output = scraper_config._configure_rating_prefix(input_details, input_settings)
+
+        self.assertEqual(expected_output['info'].get('mpaa'), actual_output['info'].get('mpaa'))
+
+
     def test_configure_keeporiginaltitle__true(self):
         original_title = "*original title of a movie"
         input_details = {'info': {'title': "title of a movie",

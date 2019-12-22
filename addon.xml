@@ -133,7 +133,7 @@ v0.5.0 (2019-06-09)
     <email></email>
     <source>https://github.com/xbmc/metadata.themoviedb.org.python</source>
     <assets>
-      <icon>icon.png</icon>
+      <icon>resources/icon.png</icon>
     </assets>
   </extension>
 </addon>

@@ -180,9 +180,9 @@ def _get_date_numeric(datetime_):
 
 def _load_base_urls(url_settings):
     urls = {}
-    urls['original'] = url_settings.getSetting('originalUrl')
-    urls['preview'] = url_settings.getSetting('previewUrl')
-    last_updated = url_settings.getSetting('lastUpdated')
+    urls['original'] = url_settings.getSettingString('originalUrl')
+    urls['preview'] = url_settings.getSettingString('previewUrl')
+    last_updated = url_settings.getSettingString('lastUpdated')
     if not urls['original'] or not urls['preview'] or not last_updated or \
             float(last_updated) < _get_date_numeric(datetime.now() - timedelta(days=30)):
         conf = tmdbsimple.Configuration().info()

@@ -131,8 +131,8 @@ class TestScraperConfig(unittest.TestCase):
 
     def test_configure_default_rating__imdb(self):
         input_details = {'ratings': {'imdb': {'rating': 1, 'votes': 2}, 'themoviedb': {'rating': 1.1, 'votes': 3}}}
-        input_settings = MagicMock(spec=['getSetting'])
-        input_settings.getSetting.return_value = 'IMDb'
+        input_settings = MagicMock(spec=['getSettingString'])
+        input_settings.getSettingString.return_value = 'IMDb'
 
         expected_output = {'ratings': {
             'imdb': {'rating': 1, 'votes': 2, 'default': True},
@@ -142,12 +142,12 @@ class TestScraperConfig(unittest.TestCase):
         actual_output = scraper_config._configure_default_rating(input_details, input_settings)
 
         self.assertDictEqual(expected_output['ratings'], actual_output['ratings'])
-        input_settings.getSetting.assert_called_once_with('RatingS')
+        input_settings.getSettingString.assert_called_once_with('RatingS')
 
     def test_configure_default_rating__imdb_no_imdb_fallback_to_tmdb(self):
         input_details = {'ratings': {'themoviedb': {'rating': 1.2, 'votes': 4}}}
-        input_settings = MagicMock(spec=['getSetting'])
-        input_settings.getSetting.return_value = 'IMDb'
+        input_settings = MagicMock(spec=['getSettingString'])
+        input_settings.getSettingString.return_value = 'IMDb'
 
         expected_output = {'ratings': {
             'themoviedb': {'rating': 1.2, 'votes': 4, 'default': True}
@@ -159,8 +159,8 @@ class TestScraperConfig(unittest.TestCase):
 
     def test_configure_default_rating__tmdb(self):
         input_details = {'ratings': {'imdb': {'rating': 1, 'votes': 5}, 'themoviedb': {'rating': 1.3, 'votes': 6}}}
-        input_settings = MagicMock(spec=['getSetting'])
-        input_settings.getSetting.return_value = 'TMDb'
+        input_settings = MagicMock(spec=['getSettingString'])
+        input_settings.getSettingString.return_value = 'TMDb'
 
         expected_output = {'ratings': {
             'imdb': {'rating': 1, 'votes': 5, 'default': False},
@@ -170,12 +170,12 @@ class TestScraperConfig(unittest.TestCase):
         actual_output = scraper_config._configure_default_rating(input_details, input_settings)
 
         self.assertDictEqual(expected_output['ratings'], actual_output['ratings'])
-        input_settings.getSetting.assert_called_once_with('RatingS')
+        input_settings.getSettingString.assert_called_once_with('RatingS')
 
     def test_configure_default_rating__tmdb_no_tmdb_fallback_to_imdb(self):
         input_details = {'ratings': {'imdb': {'rating': 1, 'votes': 7}}}
-        input_settings = MagicMock(spec=['getSetting'])
-        input_settings.getSetting.return_value = 'TMDb'
+        input_settings = MagicMock(spec=['getSettingString'])
+        input_settings.getSettingString.return_value = 'TMDb'
 
         expected_output = {'ratings': {
             'imdb': {'rating': 1, 'votes': 7, 'default': True}
@@ -184,12 +184,12 @@ class TestScraperConfig(unittest.TestCase):
         actual_output = scraper_config._configure_default_rating(input_details, input_settings)
 
         self.assertDictEqual(expected_output['ratings'], actual_output['ratings'])
-        input_settings.getSetting.assert_called_once_with('RatingS')
+        input_settings.getSettingString.assert_called_once_with('RatingS')
 
     def test_configure_default_rating__tmdb_no_ratings(self):
         input_details = {'ratings': {}}
-        input_settings = MagicMock(spec=['getSetting'])
-        input_settings.getSetting.return_value = 'TMDb'
+        input_settings = MagicMock(spec=['getSettingString'])
+        input_settings.getSettingString.return_value = 'TMDb'
 
         expected_output = {'ratings': {}}
 

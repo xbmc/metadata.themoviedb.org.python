@@ -27,8 +27,8 @@ def _configure_multiple_studios(details, settings):
     return details
 
 def _configure_default_rating(details, settings):
-    imdb_default = bool(details['ratings'].get('imdb')) and settings.getSetting('RatingS') == 'IMDb'
-    trakt_default = bool(details['ratings'].get('trakt')) and settings.getSetting('RatingS') == 'Trakt'
+    imdb_default = bool(details['ratings'].get('imdb')) and settings.getSettingString('RatingS') == 'IMDb'
+    trakt_default = bool(details['ratings'].get('trakt')) and settings.getSettingString('RatingS') == 'Trakt'
     default_rating = 'themoviedb'
     if imdb_default:
         default_rating = 'imdb'

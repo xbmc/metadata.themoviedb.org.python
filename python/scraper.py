@@ -9,7 +9,7 @@ from lib.tmdbscraper.tmdb import TMDBMovieScraper
 from lib.tmdbscraper.imdbratings import get_details as get_imdb_details
 from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
 from scraper_datahelper import combine_scraped_details_info_and_ratings, find_uniqueids_in_text, get_params
-from scraper_config import configure_scraped_details
+from scraper_config import configure_scraped_details, PathSpecificSettings
 
 ADDON_SETTINGS = xbmcaddon.Addon()
 ID = ADDON_SETTINGS.getAddonInfo('id')
@@ -127,7 +127,8 @@ def run():
     params = get_params(sys.argv[1:])
     enddir = True
     if 'action' in params:
-        settings = ADDON_SETTINGS
+        settings = ADDON_SETTINGS if not params.get('pathSettings') else \
+            PathSpecificSettings(json.loads(params['pathSettings']), lambda msg: log(msg, xbmc.LOGWARNING))
         action = params["action"]
         if action == 'find' and 'title' in params:
             search_for_movie(params["title"], params.get("year"), params['handle'], settings)

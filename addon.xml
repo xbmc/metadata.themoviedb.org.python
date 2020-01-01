@@ -17,16 +17,17 @@
   <!-- <extension point="xbmc.python.module" library="python/lib" /> -->
   <extension point="xbmc.addon.metadata">
     <reuselanguageinvoker>true</reuselanguageinvoker>
-    <news>v0.6.0 (2019-07-04)
+    <news>v0.7.0 (2020-01-01) - release candidate
+- Feature: add trakt rating
+- Feature: search by IMDB or TMDB ID
+- Fix: support path-specific settings
+
+v0.6.0 (2019-07-04)
 - Feature: add option to configure certification prefix
 - Feature: add option to return single or multiple studios
 - Feature: add movie set overview and artwork when scanning movies
 - Fix: IMDB top 250 and ratings
-- Fix: parsing NFO file for URL / ID
-
-v0.5.0 (2019-06-09)
-- first Python version
-- early version mostly by @phate89, with an old version of tmdbsimple</news>
+- Fix: parsing NFO file for URL / ID</news>
     <summary lang="af_ZA">TMDB Fliek Skraper</summary>
     <summary lang="be_BY">TMDB Movie Scraper</summary>
     <summary lang="bg_BG">Сваля инф. за филми от TMDB</summary>

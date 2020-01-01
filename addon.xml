@@ -15,6 +15,7 @@
              library="python/scraper.py"/>
   <!-- <extension point="xbmc.python.module" library="python/lib" /> -->
   <extension point="xbmc.addon.metadata">
+    <reuselanguageinvoker>true</reuselanguageinvoker>
     <news>v0.6.0 (2019-07-04)
 - Feature: add option to configure certification prefix
 - Feature: add option to return single or multiple studios

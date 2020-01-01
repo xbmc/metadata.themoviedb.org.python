@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name,protected-access,too-many-lines
+# pylint: disable=invalid-name,protected-access,too-many-lines,unused-argument
 import unittest
 from unittest.mock import MagicMock
 
@@ -19,7 +19,7 @@ class TestScraperConfig(unittest.TestCase):
 
     def test_configure_rating_prefix__no_rating(self):
         input_details = {'info': {}}
-        input_settings = MagicMock()
+        input_settings = MagicMock(spec=[])
 
         expected_output = {'info': {}}
 
@@ -196,3 +196,66 @@ class TestScraperConfig(unittest.TestCase):
         actual_output = scraper_config._configure_default_rating(input_details, input_settings)
 
         self.assertDictEqual(expected_output['ratings'], actual_output['ratings'])
+
+
+class TestPathSpecificSettings(unittest.TestCase):
+    def test_getSettingString(self):
+        input_settings_dict = {'setting': 'value'}
+        input_logger = build_input_logger()
+
+        expected_output = 'value'
+
+        actual_output = build_path_settings(input_settings_dict, input_logger).getSettingString('setting')
+
+        self.assertEqual(expected_output, actual_output)
+        self.assertEqual(input_logger.call_count, 0)
+
+    def test_getSettingString__doesnt_exist(self):
+        input_settings_dict = {}
+        input_logger = build_input_logger()
+
+        expected_output = ''
+
+        actual_output = build_path_settings(input_settings_dict, input_logger).getSettingString('setting')
+
+        self.assertEqual(expected_output, actual_output)
+        input_logger.assert_called_once_with("requested setting (setting) was not found.")
+
+    def test_getSettingBool__true(self):
+        self._inner_test_getSettingBool__success(True, True)
+
+    def test_getSettingBool__false(self):
+        self._inner_test_getSettingBool__success(False, False)
+
+    def _inner_test_getSettingBool__success(self, setting_value, expected_output):
+        input_settings_dict = {'setting': setting_value}
+        input_logger = build_input_logger()
+
+        actual_output = build_path_settings(input_settings_dict, input_logger).getSettingBool('setting')
+
+        self.assertEqual(expected_output, actual_output)
+        self.assertEqual(input_logger.call_count, 0)
+
+    def test_getSettingBool__bad_value(self):
+        self._inner_test_getSettingBool__failure({'setting': 'zilch'},
+            'failed to load value "zilch" for setting setting')
+
+    def test_getSettingBool__doesnt_exist(self):
+        self._inner_test_getSettingBool__failure({}, "requested setting (setting) was not found.")
+
+    def _inner_test_getSettingBool__failure(self, input_settings_dict, fail_message):
+        input_logger = build_input_logger()
+
+        expected_output = False
+
+        actual_output = build_path_settings(input_settings_dict, input_logger).getSettingBool('setting')
+
+        self.assertEqual(expected_output, actual_output)
+        input_logger.assert_called_once_with(fail_message)
+
+def build_path_settings(input_settings_dict, input_logger):
+    return scraper_config.PathSpecificSettings(input_settings_dict, input_logger)
+
+def build_input_logger():
+    def input_logger_fn(msg: str): pass
+    return MagicMock(spec=input_logger_fn)

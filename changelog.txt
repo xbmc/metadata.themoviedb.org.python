@@ -1,3 +1,8 @@
+v0.7.0 (2020-01-01) - release candidate
+- Feature: add trakt rating
+- Feature: search by IMDB or TMDB ID
+- Fix: support path-specific settings
+
 v0.6.0 (2019-07-04)
 - Feature: add setting to configure certification prefix
 - Feature: add option to return single or multiple studios

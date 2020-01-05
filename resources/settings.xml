@@ -8,4 +8,8 @@
     <setting label="30008" type="text" id="certprefix" default="Rated " />
     <setting label="30003" type="labelenum" values="TMDb|IMDb|Trakt" id="RatingS" default="TMDb"/>
     <setting label="30009" type="bool" id="multiple_studios" default="false" />
+    <!-- For add-on inner workings -->
+    <setting id="lastUpdated" type="text" default="0" visible="false" />
+    <setting id="originalUrl" type="text" default="" visible="false" />
+    <setting id="previewUrl" type="text" default="" visible="false" />
 </settings>

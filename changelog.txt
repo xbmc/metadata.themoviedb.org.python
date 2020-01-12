@@ -1,4 +1,4 @@
-v0.7.0 (2020-01-01) - release candidate
+v0.7.0 (2020-01-11) - release candidate
 - Feature: add trakt rating
 - Feature: search by IMDB or TMDB ID
 - Fix: support path-specific settings

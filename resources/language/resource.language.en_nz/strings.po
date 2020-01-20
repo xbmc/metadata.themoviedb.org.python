@@ -55,3 +55,7 @@ msgstr ""
 msgctxt "#30009"
 msgid "Add multiple studios"
 msgstr ""
+
+msgctxt "#30010"
+msgid "Add also Trakt.tv ratings"
+msgstr ""

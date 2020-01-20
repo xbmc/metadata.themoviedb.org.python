@@ -83,15 +83,17 @@ def get_details(input_uniqueids, handle, settings):
         log(header + ': ' + details['error'], xbmc.LOGWARNING)
         return False
 
-    imdbinfo = get_imdb_details(details['uniqueids'])
-    if 'error' in imdbinfo:
-        header = "The Movie Database Python error with website IMDB"
-        log(header + ': ' + imdbinfo['error'], xbmc.LOGWARNING)
-    else:
-        details = combine_scraped_details_info_and_ratings(details, imdbinfo)
+    if settings.getSettingString('RatingS') == 'IMDb' or settings.getSettingBool('imdbanyway'):
+        imdbinfo = get_imdb_details(details['uniqueids'])
+        if 'error' in imdbinfo:
+            header = "The Movie Database Python error with website IMDB"
+            log(header + ': ' + imdbinfo['error'], xbmc.LOGWARNING)
+        else:
+            details = combine_scraped_details_info_and_ratings(details, imdbinfo)
 
-    traktinfo = get_trakt_ratinginfo(details['uniqueids'])
-    details = combine_scraped_details_info_and_ratings(details, traktinfo)
+    if settings.getSettingString('RatingS') == 'Trakt' or settings.getSettingBool('traktanyway'):
+        traktinfo = get_trakt_ratinginfo(details['uniqueids'])
+        details = combine_scraped_details_info_and_ratings(details, traktinfo)
 
     details = configure_scraped_details(details, settings)
 

@@ -45,6 +45,14 @@ class TestScraperDatahelper(unittest.TestCase):
 
         self.assertDictEqual(expected_output, actual_output)
 
+    def test_get_params__some_random_querystring_with_percent(self):
+        input_model = ('1', "?acorns=%25100%20nested")
+        expected_output = {'handle': 1, 'acorns': '%100 nested'}
+
+        actual_output = scraper_datahelper.get_params(input_model)
+
+        self.assertDictEqual(expected_output, actual_output)
+
 
     def test_combine_scraped_details_info_and_ratings(self):
         input_model1 = {'info': {'bit': 1}, 'ratings': {'w1': {'rating': 1, 'votes': 2}}}

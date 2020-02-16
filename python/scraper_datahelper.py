@@ -1,10 +1,8 @@
 import re
 try:
-    import urlparse
-    from urllib import unquote_plus
+    from urlparse import parse_qsl
 except ImportError: # py2 / py3
-    from urllib import parse as urlparse
-    from urllib.parse import unquote_plus
+    from urllib.parse import parse_qsl
 
 # get addon params from the plugin path querystring
 def get_params(argv):
@@ -12,8 +10,7 @@ def get_params(argv):
     if len(argv) < 2 or not argv[1]:
         return result
 
-    result_list = [(key, unquote_plus(value)) for key, value in urlparse.parse_qsl(argv[1].lstrip('?'))]
-    result.update(result_list)
+    result.update(parse_qsl(argv[1].lstrip('?')))
     return result
 
 def combine_scraped_details_info_and_ratings(original_details, additional_details):

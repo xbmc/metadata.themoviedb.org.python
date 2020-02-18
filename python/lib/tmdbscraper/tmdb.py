@@ -140,12 +140,15 @@ def _get_moviecollection(collection_id, language=None):
 
 
 def _parse_artwork(movie, collection, urlbases, language):
-    posters = _get_posters(movie['images']['posters'], urlbases, language)
-    fanart = _get_images(movie['images']['backdrops'], urlbases, language)
+    posters = []
+    fanart = []
+    if 'images' in movie:
+        posters = _get_posters(movie['images']['posters'], urlbases, language)
+        fanart = _get_images(movie['images']['backdrops'], urlbases, language)
 
     setposters = []
     setfanart = []
-    if collection:
+    if collection and 'images' in collection:
         setposters = _get_posters(collection['images']['posters'], urlbases, language)
         setfanart = _get_images(collection['images']['backdrops'], urlbases, language)
 

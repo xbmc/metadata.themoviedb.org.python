@@ -3,6 +3,9 @@ from requests.exceptions import ConnectionError as RequestsConnectionError, Time
 
 import tmdbsimple
 
+# These are the same possible exceptions received from any HTTP request with `requests`
+connection_exceptions = (Timeout, RequestsConnectionError, RequestException)
+
 # Same key as built-in XML scraper
 tmdbsimple.API_KEY = 'f090bb54758cabf231fb605d3e3e0468'
 
@@ -29,7 +32,7 @@ class TMDBMovieScraper(object):
         else:
             try:
                 response = tmdbsimple.Search().movie(query=title, year=year, language=self.language)
-            except (Timeout, RequestsConnectionError, RequestException) as ex:
+            except connection_exceptions as ex:
                 return _format_error_message(ex)
             result = response['results']
         urls = self.urls
@@ -125,7 +128,7 @@ def _get_movie(mid, language=None, search=False):
     movie = tmdbsimple.Movies(mid)
     try:
         return movie.info(language=language, append_to_response=details)
-    except (Timeout, RequestsConnectionError, RequestException) as ex:
+    except connection_exceptions as ex:
         return _format_error_message(ex)
 
 def _get_moviecollection(collection_id, language=None):
@@ -135,7 +138,7 @@ def _get_moviecollection(collection_id, language=None):
     collection = tmdbsimple.Collections(collection_id)
     try:
         return collection.info(language=language, append_to_response=details)
-    except (Timeout, RequestsConnectionError, RequestException) as ex:
+    except connection_exceptions as ex:
         return _format_error_message(ex)
 
 
@@ -213,7 +216,5 @@ def _get_cast_members(casts, casttype, department, jobs):
     return result
 
 def _format_error_message(ex):
-    message = type(ex).__name__
-    if hasattr(ex, 'message'):
-        message += ": {0}".format(ex.message)
+    message = ex.response.reason if getattr(ex, 'response', None) is not None else type(ex).__name__
     return {'error': message}

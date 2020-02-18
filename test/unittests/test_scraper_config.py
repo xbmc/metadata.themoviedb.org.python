@@ -197,6 +197,31 @@ class TestScraperConfig(unittest.TestCase):
 
         self.assertDictEqual(expected_output['ratings'], actual_output['ratings'])
 
+    def test_configure_tags__true(self):
+        tags = ["tag 1", "tag 2"]
+        input_details = {'info': {'tag': tags}}
+        input_settings = MagicMock(spec=['getSettingBool'])
+        input_settings.getSettingBool.return_value = True
+
+        expected_output = {'info': {'tag': tags}}
+
+        actual_output = scraper_config._configure_tags(input_details, input_settings)
+
+        self.assertListEqual(expected_output['info']['tag'], actual_output['info']['tag'])
+        input_settings.getSettingBool.assert_called_once_with('add_tags')
+
+    def test_configure_tags__false(self):
+        input_details = {'info': {'tag': ["tag 1", "tag 2"]}}
+        input_settings = MagicMock(spec=['getSettingBool'])
+        input_settings.getSettingBool.return_value = False
+
+        expected_output = {'info': {}}
+
+        actual_output = scraper_config._configure_tags(input_details, input_settings)
+
+        self.assertDictEqual(expected_output['info'], actual_output['info'])
+        input_settings.getSettingBool.assert_called_once_with('add_tags')
+
 
 class TestPathSpecificSettings(unittest.TestCase):
     def test_getSettingString(self):

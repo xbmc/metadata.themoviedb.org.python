@@ -4,6 +4,7 @@ def configure_scraped_details(details, settings):
     details = _configure_trailer(details, settings)
     details = _configure_multiple_studios(details, settings)
     details = _configure_default_rating(details, settings)
+    details = _configure_tags(details, settings)
     return details
 
 def _configure_rating_prefix(details, settings):
@@ -38,6 +39,11 @@ def _configure_default_rating(details, settings):
         default_rating = list(details['ratings'].keys())[0] if details['ratings'] else None
     for rating_type in details['ratings'].keys():
         details['ratings'][rating_type]['default'] = rating_type == default_rating
+    return details
+
+def _configure_tags(details, settings):
+    if not settings.getSettingBool('add_tags'):
+        del details['info']['tag']
     return details
 
 # pylint: disable=invalid-name

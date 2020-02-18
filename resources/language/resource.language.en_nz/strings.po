@@ -59,3 +59,7 @@ msgstr ""
 msgctxt "#30010"
 msgid "Add also Trakt.tv ratings"
 msgstr ""
+
+msgctxt "#30011"
+msgid "Add keywords as tags"
+msgstr ""

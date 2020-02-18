@@ -76,7 +76,8 @@ class TMDBMovieScraper(object):
             'country': _get_names(movie['production_countries']),
             'credits': _get_cast_members(movie['casts'], 'crew', 'Writing', ['Screenplay', 'Writer', 'Author']),
             'director': _get_cast_members(movie['casts'], 'crew', 'Directing', ['Director']),
-            'premiered': movie['release_date']
+            'premiered': movie['release_date'],
+            'tag': _get_names(movie['keywords']['keywords'])
         }
 
         if 'countries' in movie['releases']:
@@ -121,7 +122,9 @@ def _parse_media_id(title):
     return None
 
 def _get_movie(mid, language=None, search=False):
-    details = None if search else 'trailers,releases,casts,' if language is not None else 'trailers,images'
+    details = None if search else \
+        'trailers,releases,casts,keywords' if language is not None else \
+        'trailers,images'
     movie = tmdbsimple.Movies(mid)
     try:
         return movie.info(language=language, append_to_response=details)

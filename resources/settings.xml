@@ -10,6 +10,7 @@
     <setting label="30007" type="bool" id="imdbanyway" visible="!eq(-1,1)" default="false"/>
     <setting label="30010" type="bool" id="traktanyway" visible="!eq(-2,2)" default="false"/>
     <setting label="30009" type="bool" id="multiple_studios" default="false" />
+    <setting label="30011" type="bool" id="add_tags" default="true" />
     <!-- For add-on inner workings -->
     <setting id="lastUpdated" type="text" default="0" visible="false" />
     <setting id="originalUrl" type="text" default="" visible="false" />

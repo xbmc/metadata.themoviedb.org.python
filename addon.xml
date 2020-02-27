@@ -16,7 +16,10 @@
              library="python/scraper.py"/>
   <extension point="xbmc.addon.metadata">
     <reuselanguageinvoker>true</reuselanguageinvoker>
-    <news>v1.0.0 (2020-01-26)
+    <news>v1.1.0 (2020-02-26)
+- Feature: option to add plot keywords from TMDB as tags
+
+v1.0.0 (2020-01-26)
 - Feature: option to enable/disable IMDB and Trakt ratings
 
 v0.7.0 (2020-01-11) - release candidate

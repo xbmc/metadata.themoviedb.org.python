@@ -60,10 +60,10 @@ IMAGE_LIMIT = 10
 
 def add_artworks(listitem, artworks, settings):
     for poster in artworks['poster'][:IMAGE_LIMIT]:
-        listitem.addAvailableArtwork(poster['url'], "poster", poster['preview'])
+        listitem.addAvailableArtwork(poster['url'], "poster")
 
     for poster in artworks['set.poster'][:IMAGE_LIMIT]:
-        listitem.addAvailableArtwork(poster['url'], "set.poster", poster['preview'])
+        listitem.addAvailableArtwork(poster['url'], "set.poster")
 
     if settings.getSettingBool('fanart'):
         fanart_to_set = [{'image': image['url'], 'preview': image['preview']}
@@ -71,7 +71,7 @@ def add_artworks(listitem, artworks, settings):
         listitem.setAvailableFanart(fanart_to_set)
 
         for fanart in artworks['set.fanart'][:IMAGE_LIMIT]:
-            listitem.addAvailableArtwork(fanart['url'], "set.fanart", fanart['preview'])
+            listitem.addAvailableArtwork(fanart['url'], "set.fanart")
 
 def get_details(input_uniqueids, handle, settings):
     details = get_tmdb_scraper(settings).get_details(input_uniqueids)

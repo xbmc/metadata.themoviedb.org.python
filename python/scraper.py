@@ -35,12 +35,7 @@ def search_for_movie(title, year, handle, settings):
         return
 
     for movie in search_results:
-        listitem = xbmcgui.ListItem(movie['title'], offscreen=True)
-        movie_year = movie['release_date'].split('-')[0] if movie.get('release_date') else None
-        if movie_year:
-            listitem.setInfo('video', {'year': movie_year})
-        if movie['poster_path']:
-            listitem.setArt({'thumb': movie['poster_path']})
+        listitem = _searchresult_to_listitem(movie)
         uniqueids = {'tmdb': str(movie['id'])}
         xbmcplugin.addDirectoryItem(handle=handle, url=build_lookup_string(uniqueids),
             listitem=listitem, isFolder=True)
@@ -52,6 +47,23 @@ def _strip_trailing_article(title):
         if title.endswith(article):
             return title[:-len(article)]
     return title
+
+def _searchresult_to_listitem(movie):
+    movie_info = {'title': movie['title']}
+    movie_label = movie['title']
+
+    movie_year = movie['release_date'].split('-')[0] if movie.get('release_date') else None
+    if movie_year:
+        movie_label += ' ({})'.format(movie_year)
+        movie_info['year'] = movie_year
+
+    listitem = xbmcgui.ListItem(movie_label, offscreen=True)
+
+    listitem.setInfo('video', movie_info)
+    if movie['poster_path']:
+        listitem.setArt({'thumb': movie['poster_path']})
+
+    return listitem
 
 # Low limit because a big list of artwork can cause trouble in some cases
 # (a column can be too large for the MySQL integration),

@@ -6,10 +6,13 @@ import xbmcgui
 import xbmcplugin
 
 from lib.tmdbscraper.tmdb import TMDBMovieScraper
+from lib.tmdbscraper.fanarttv import get_details as get_fanarttv_artwork
 from lib.tmdbscraper.imdbratings import get_details as get_imdb_details
 from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
-from scraper_datahelper import combine_scraped_details_info_and_ratings, find_uniqueids_in_text, get_params
-from scraper_config import configure_scraped_details, PathSpecificSettings
+from scraper_datahelper import combine_scraped_details_info_and_ratings, \
+    combine_scraped_details_available_artwork, find_uniqueids_in_text, get_params
+from scraper_config import configure_scraped_details, PathSpecificSettings, \
+    configure_fanarttv_artwork, is_fanarttv_configured
 
 ADDON_SETTINGS = xbmcaddon.Addon()
 ID = ADDON_SETTINGS.getAddonInfo('id')
@@ -71,11 +74,11 @@ def _searchresult_to_listitem(movie):
 IMAGE_LIMIT = 10
 
 def add_artworks(listitem, artworks, settings):
-    for poster in artworks['poster'][:IMAGE_LIMIT]:
-        listitem.addAvailableArtwork(poster['url'], "poster")
-
-    for poster in artworks['set.poster'][:IMAGE_LIMIT]:
-        listitem.addAvailableArtwork(poster['url'], "set.poster")
+    for arttype, artlist in artworks.items():
+        if arttype in ('fanart', 'set.fanart'):
+            continue
+        for image in artlist[:IMAGE_LIMIT]:
+            listitem.addAvailableArtwork(image['url'], arttype)
 
     if settings.getSettingBool('fanart'):
         fanart_to_set = [{'image': image['url'], 'preview': image['preview']}
@@ -106,6 +109,14 @@ def get_details(input_uniqueids, handle, settings):
     if settings.getSettingString('RatingS') == 'Trakt' or settings.getSettingBool('traktanyway'):
         traktinfo = get_trakt_ratinginfo(details['uniqueids'])
         details = combine_scraped_details_info_and_ratings(details, traktinfo)
+
+    if is_fanarttv_configured(settings):
+        fanarttv_info = get_fanarttv_artwork(details['uniqueids'],
+            settings.getSettingString('fanarttv_clientkey'),
+            settings.getSettingString('fanarttv_language'),
+            details['_info']['set_tmdbid'])
+        fanarttv_info = configure_fanarttv_artwork(fanarttv_info, settings)
+        details = combine_scraped_details_available_artwork(details, fanarttv_info)
 
     details = configure_scraped_details(details, settings)
 

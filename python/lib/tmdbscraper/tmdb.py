@@ -112,8 +112,11 @@ class TMDBMovieScraper(object):
         ]
         available_art = _parse_artwork(movie_fallback, collection_fallback, self.urls, self.language)
 
+        _info = {'set_tmdbid': movie['belongs_to_collection'].get('id')
+            if movie['belongs_to_collection'] else None}
+
         return {'info': info, 'ratings': ratings, 'uniqueids': uniqueids, 'cast': cast,
-            'available_art': available_art}
+            'available_art': available_art, '_info': _info}
 
 def _parse_media_id(title):
     if title.startswith('tt') and title[2:].isdigit():

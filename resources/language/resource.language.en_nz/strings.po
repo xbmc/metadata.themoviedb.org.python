@@ -17,7 +17,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgctxt "#30000"
-msgid "Enable Fanart"
+msgid "Enable fanart from TMDb"
 msgstr ""
 
 msgctxt "#30001"
@@ -62,6 +62,10 @@ msgstr ""
 
 msgctxt "#30011"
 msgid "Add keywords as tags"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Enable landscape from TMDb"
 msgstr ""
 
 msgctxt "#30100"

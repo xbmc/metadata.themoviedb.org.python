@@ -150,36 +150,41 @@ def _get_moviecollection(collection_id, language=None):
 
 def _parse_artwork(movie, collection, urlbases, language):
     posters = []
+    landscape = []
     fanart = []
     if 'images' in movie:
-        posters = _get_posters(movie['images']['posters'], urlbases, language)
-        fanart = _get_images(movie['images']['backdrops'], urlbases, language)
+        posters = _get_images_with_fallback(movie['images']['posters'], urlbases, language)
+        landscape = _get_images(movie['images']['backdrops'], urlbases, language)
+        fanart = _get_images(movie['images']['backdrops'], urlbases, None)
 
     setposters = []
+    setlandscape = []
     setfanart = []
     if collection and 'images' in collection:
-        setposters = _get_posters(collection['images']['posters'], urlbases, language)
-        setfanart = _get_images(collection['images']['backdrops'], urlbases, language)
+        setposters = _get_images_with_fallback(collection['images']['posters'], urlbases, language)
+        setlandscape = _get_images(collection['images']['backdrops'], urlbases, language)
+        setfanart = _get_images(collection['images']['backdrops'], urlbases, None)
 
-    return {'poster': posters, 'fanart': fanart, 'set.poster': setposters, 'set.fanart': setfanart}
+    return {'poster': posters, 'landscape': landscape, 'fanart': fanart,
+        'set.poster': setposters, 'set.landscape': setlandscape, 'set.fanart': setfanart}
 
-def _get_posters(posterlist, urlbases, language):
-    posters = _get_images(posterlist, urlbases, language)
+def _get_images_with_fallback(imagelist, urlbases, language, language_fallback='en'):
+    images = _get_images(imagelist, urlbases, language)
 
-    # Add backup English posters
-    if language != 'en':
-        posters.extend(_get_images(posterlist, urlbases, 'en'))
+    # Add backup images
+    if language != language_fallback:
+        images.extend(_get_images(imagelist, urlbases, language_fallback))
 
-    # Add any poster if nothing set so far
-    if not posters:
-        posters = _get_images(posterlist, urlbases)
+    # Add any images if nothing set so far
+    if not images:
+        images = _get_images(imagelist, urlbases)
 
-    return posters
+    return images
 
-def _get_images(imagelist, urlbases, language=None):
+def _get_images(imagelist, urlbases, language='_any'):
     result = []
     for img in imagelist:
-        if language and img['iso_639_1'] and img['iso_639_1'] != language:
+        if language != '_any' and img['iso_639_1'] != language:
             continue
         result.append({
             'url': urlbases['original'] + img['file_path'],

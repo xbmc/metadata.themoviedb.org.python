@@ -12,7 +12,7 @@ from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
 from scraper_datahelper import combine_scraped_details_info_and_ratings, \
     combine_scraped_details_available_artwork, find_uniqueids_in_text, get_params
 from scraper_config import configure_scraped_details, PathSpecificSettings, \
-    configure_fanarttv_artwork, is_fanarttv_configured
+    configure_fanarttv_artwork, configure_tmdb_artwork, is_fanarttv_configured
 
 ADDON_SETTINGS = xbmcaddon.Addon()
 ID = ADDON_SETTINGS.getAddonInfo('id')
@@ -73,20 +73,16 @@ def _searchresult_to_listitem(movie):
 # and how useful is a big list anyway? Not exactly rhetorical, this is an experiment.
 IMAGE_LIMIT = 10
 
-def add_artworks(listitem, artworks, settings):
+def add_artworks(listitem, artworks):
     for arttype, artlist in artworks.items():
-        if arttype in ('fanart', 'set.fanart'):
+        if arttype == 'fanart':
             continue
         for image in artlist[:IMAGE_LIMIT]:
             listitem.addAvailableArtwork(image['url'], arttype)
 
-    if settings.getSettingBool('fanart'):
-        fanart_to_set = [{'image': image['url'], 'preview': image['preview']}
-            for image in artworks['fanart'][:IMAGE_LIMIT]]
-        listitem.setAvailableFanart(fanart_to_set)
-
-        for fanart in artworks['set.fanart'][:IMAGE_LIMIT]:
-            listitem.addAvailableArtwork(fanart['url'], "set.fanart")
+    fanart_to_set = [{'image': image['url'], 'preview': image['preview']}
+        for image in artworks['fanart'][:IMAGE_LIMIT]]
+    listitem.setAvailableFanart(fanart_to_set)
 
 def get_details(input_uniqueids, handle, settings):
     details = get_tmdb_scraper(settings).get_details(input_uniqueids)
@@ -97,6 +93,8 @@ def get_details(input_uniqueids, handle, settings):
         xbmcgui.Dialog().notification(header, details['error'], xbmcgui.NOTIFICATION_WARNING)
         log(header + ': ' + details['error'], xbmc.LOGWARNING)
         return False
+
+    details = configure_tmdb_artwork(details, settings)
 
     if settings.getSettingString('RatingS') == 'IMDb' or settings.getSettingBool('imdbanyway'):
         imdbinfo = get_imdb_details(details['uniqueids'])
@@ -124,7 +122,7 @@ def get_details(input_uniqueids, handle, settings):
     listitem.setInfo('video', details['info'])
     listitem.setCast(details['cast'])
     listitem.setUniqueIDs(details['uniqueids'], 'tmdb')
-    add_artworks(listitem, details['available_art'], settings)
+    add_artworks(listitem, details['available_art'])
 
     for rating_type, value in details['ratings'].items():
         if 'votes' in value:

@@ -35,7 +35,7 @@ def get_details(uniqueids, clientkey, language, set_tmdbid):
     if movie_data:
         movie_art = _parse_data(movie_data, language)
     if movieset_data:
-        movieset_art = _parse_data(movie_data, language)
+        movieset_art = _parse_data(movieset_data, language)
         movieset_art = {'set.' + key: value for key, value in movieset_art.items()}
 
     available_art = movie_art

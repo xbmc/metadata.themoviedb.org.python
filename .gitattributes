@@ -1,0 +1,5 @@
+.gitignore export-ignore
+.gitattributes export-ignore
+.github export-ignore
+changelog.txt export-ignore
+/test export-ignore

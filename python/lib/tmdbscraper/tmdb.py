@@ -199,8 +199,8 @@ def _load_base_urls(url_settings):
             float(last_updated) < _get_date_numeric(datetime.now() - timedelta(days=30)):
         conf = tmdbsimple.Configuration().info()
         if conf:
-            urls['original'] = conf['images']['base_url'] + 'original'
-            urls['preview'] = conf['images']['base_url'] + 'w780'
+            urls['original'] = conf['images']['secure_base_url'] + 'original'
+            urls['preview'] = conf['images']['secure_base_url'] + 'w780'
             url_settings.setSetting('originalUrl', urls['original'])
             url_settings.setSetting('previewUrl', urls['preview'])
             url_settings.setSetting('lastUpdated', str(_get_date_numeric(datetime.now())))

@@ -1,3 +1,7 @@
+v1.2.0 (2020-05-25)
+- Feature: add extended artwork from Fanart.tv
+- Feature: separate 'fanart' images with language to 'landscape' art type
+
 v1.1.1 (2020-03-01)
 - Fix: release fixup
 

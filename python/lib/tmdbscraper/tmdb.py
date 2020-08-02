@@ -234,7 +234,7 @@ def _get_cast_members(casts, casttype, department, jobs):
     result = []
     if casttype in casts:
         for cast in casts[casttype]:
-            if cast['department'] == department and cast['job'] in jobs:
+            if cast['department'] == department and cast['job'] in jobs and cast['name'] not in result:
                 result.append(cast['name'])
     return result
 

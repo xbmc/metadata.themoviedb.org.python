@@ -1,3 +1,9 @@
+v1.2.1 (2020-08-08)
+- Fix: Prefer movies that exactly match search title and year
+- Fix: Change 'landscape from TMDb' option disabled behavior to keep titled fanart
+- Fix: Don't dupe Writers if listed with multiple jobs
+- Fix: Capitalize country code in all language options
+
 v1.2.0 (2020-05-25)
 - Feature: add extended artwork from Fanart.tv
 - Feature: separate 'fanart' images with language to 'landscape' art type

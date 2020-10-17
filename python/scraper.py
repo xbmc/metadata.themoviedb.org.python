@@ -12,7 +12,7 @@ from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
 from scraper_datahelper import combine_scraped_details_info_and_ratings, \
     combine_scraped_details_available_artwork, find_uniqueids_in_text, get_params
 from scraper_config import configure_scraped_details, PathSpecificSettings, \
-    configure_fanarttv_artwork, configure_tmdb_artwork, is_fanarttv_configured
+    configure_tmdb_artwork, is_fanarttv_configured
 
 ADDON_SETTINGS = xbmcaddon.Addon()
 ID = ADDON_SETTINGS.getAddonInfo('id')
@@ -113,7 +113,6 @@ def get_details(input_uniqueids, handle, settings):
             settings.getSettingString('fanarttv_clientkey'),
             settings.getSettingString('fanarttv_language'),
             details['_info']['set_tmdbid'])
-        fanarttv_info = configure_fanarttv_artwork(fanarttv_info, settings)
         details = combine_scraped_details_available_artwork(details, fanarttv_info)
 
     details = configure_scraped_details(details, settings)

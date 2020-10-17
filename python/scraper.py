@@ -85,6 +85,8 @@ def add_artworks(listitem, artworks):
     listitem.setAvailableFanart(fanart_to_set)
 
 def get_details(input_uniqueids, handle, settings):
+    if not input_uniqueids:
+        return False
     details = get_tmdb_scraper(settings).get_details(input_uniqueids)
     if not details:
         return False
@@ -143,7 +145,11 @@ def build_lookup_string(uniqueids):
     return json.dumps(uniqueids)
 
 def parse_lookup_string(uniqueids):
-    return json.loads(uniqueids)
+    try:
+        return json.loads(uniqueids)
+    except ValueError:
+        log("Can't parse this lookup string, is it from another add-on?\n" + uniqueids, xbmc.LOGWARNING)
+        return None
 
 def run():
     params = get_params(sys.argv[1:])

@@ -1,3 +1,7 @@
+v1.3.1 (2020-11-02)
+- Change: simplify artwork selection options
+- Fix: strip region to pick correct poster language
+
 v1.3.0 (2020-10-04)
 - Change: removed dependencies on requests, tmdbsimple, and trakt modules
 - Change: images now returned with initial API call instead of during fallback

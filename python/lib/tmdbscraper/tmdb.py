@@ -41,8 +41,8 @@ class TMDBMovieScraper(object):
             return item['title'].lower() == title and (
                 not year or item.get('release_date', '').startswith(year))
         if result:
-            # move all `is_best` results at the beginning of the list:
-            bests_first = [item for item in result if is_best(item)]
+            # move all `is_best` results at the beginning of the list, sort them by popularity (if found):
+            bests_first = sorted([item for item in result if is_best(item)], key=lambda k: k.get('popularity',0), reverse=True)
             result = bests_first + [item for item in result if item not in bests_first]
 
         for item in result:

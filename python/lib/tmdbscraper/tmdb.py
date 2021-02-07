@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from . import tmdbapi
+from . import tmdbapi, api_utils
 
 
 class TMDBMovieScraper(object):
@@ -227,10 +227,31 @@ def _load_base_urls(url_settings):
 
 def _parse_trailer(trailers, fallback):
     if trailers.get('youtube'):
-        return 'plugin://plugin.video.youtube/?action=play_video&videoid='+trailers['youtube'][0]['source']
+        return _trailer_check(trailers.get('youtube'))
     if fallback.get('youtube'):
-        return 'plugin://plugin.video.youtube/?action=play_video&videoid='+fallback['youtube'][0]['source']
+        return _trailer_check(fallback.get('youtube'))
     return None
+
+def _trailer_check(youtube):  
+    backup_sources = []    
+    for option in youtube:
+        source = option.get('source')
+        if option.get('type') == 'Trailer':   # video is available and is defined as "Trailer" by TMDB. Perfect link!
+            if _check_youtube(source):                        
+                    return 'plugin://plugin.video.youtube/?action=play_video&videoid='+source  # video is available and is defined as "Trailer" by TMDB. Perfect link!
+            else:
+                backup_sources.append(source)      # video is available, but NOT defined as "Trailer" by TMDB. Saving it as backup in case it doesn't find any perfect link.
+    for sourcebackup in backup_sources:            
+            if _check_youtube (sourcebackup):                
+                return 'plugin://plugin.video.youtube/?action=play_video&videoid='+sourceBackup                    
+    return None 
+
+def _check_youtube (sourcebackup):
+    chk_link = "https://www.youtube.com/watch?v="+sourcebackup            
+    check = api_utils.load_info(chk_link, resp_type = 'not_json')
+    if not check or "Video unavailable" in check:       # video not available   
+        return False                            
+    return True
 
 def _get_names(items):
     return [item['name'] for item in items] if items else []

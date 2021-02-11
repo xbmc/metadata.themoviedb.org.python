@@ -23,7 +23,8 @@ def log(msg, level=xbmc.LOGDEBUG):
 def get_tmdb_scraper(settings):
     language = settings.getSettingString('language')
     certcountry = settings.getSettingString('tmdbcertcountry')
-    return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry)
+    trailer_url_chk = settings.getSettingBool('trailer_url_chk')    
+    return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry, trailer_url_chk)
 
 def search_for_movie(title, year, handle, settings):
     log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)

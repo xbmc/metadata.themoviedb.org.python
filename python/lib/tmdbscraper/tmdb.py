@@ -3,10 +3,11 @@ from . import tmdbapi, api_utils
 
 
 class TMDBMovieScraper(object):
-    def __init__(self, url_settings, language, certification_country):
+    def __init__(self, url_settings, language, certification_country, trailer_url_chk):
         self.url_settings = url_settings
         self.language = language
         self.certification_country = certification_country
+        self.trailer_url_chk = trailer_url_chk
         self._urls = None
 
     @property
@@ -99,7 +100,7 @@ class TMDBMovieScraper(object):
                     info['mpaa'] = country['certification']
                     break
 
-        trailer = _parse_trailer(movie.get('trailers', {}), movie_fallback.get('trailers', {}))
+        trailer = _parse_trailer(movie.get('trailers', {}), movie_fallback.get('trailers', {}), self.trailer_url_chk)
         if trailer:
             info['trailer'] = trailer
         if collection:
@@ -225,32 +226,37 @@ def _load_base_urls(url_settings):
             url_settings.setSetting('lastUpdated', str(_get_date_numeric(datetime.now())))
     return urls
 
-def _parse_trailer(trailers, fallback):
+def _parse_trailer(trailers, fallback, trailer_url_chk):
     if trailers.get('youtube'):
-        return _trailer_check(trailers.get('youtube'))
+        return _trailer_check(trailers.get('youtube'), trailer_url_chk)
     if fallback.get('youtube'):
-        return _trailer_check(fallback.get('youtube'))
+        return _trailer_check(fallback.get('youtube'), trailer_url_chk)
     return None
 
-def _trailer_check(youtube):  
-    backup_sources = []    
+def _trailer_check(youtube, trailer_url_chk):   
+    backup_sources = []
+    youtubeUrl = 'plugin://plugin.video.youtube/?action=play_video&videoid='
     for option in youtube:
         source = option.get('source')
-        if option.get('type') == 'Trailer':   # video is available and is defined as "Trailer" by TMDB. Perfect link!
-            if _check_youtube(source):                        
-                    return 'plugin://plugin.video.youtube/?action=play_video&videoid='+source  # video is available and is defined as "Trailer" by TMDB. Perfect link!
+        if option.get('type') == 'Trailer':   
+            if not trailer_url_chk:           # trailer_url_chk OFF                             
+                return youtubeUrl + source    # video is defined as "Trailer" by TMDB.
+            elif _check_youtube(source):         # trailer_url_chk ON
+                return youtubeUrl + source       # video is available and is defined as "Trailer" by TMDB. Perfect link!
             else:
-                backup_sources.append(source)      # video is available, but NOT defined as "Trailer" by TMDB. Saving it as backup in case it doesn't find any perfect link.
-    for sourcebackup in backup_sources:            
-            if _check_youtube (sourcebackup):                
-                return 'plugin://plugin.video.youtube/?action=play_video&videoid='+sourceBackup                    
+                backup_sources.append(source)    # Backing up sources in case it doesn't find any perfect link.
+    for sourcebackup in backup_sources:          # Starting Backups
+        if not trailer_url_chk:                  # trailer_url_chk OFF
+            return youtubeUrl + sourceBackup
+        elif _check_youtube (sourcebackup):      # trailer_url_chk ON
+            return youtubeUrl + sourceBackup    
     return None 
 
 def _check_youtube (sourcebackup):
-    chk_link = "https://www.youtube.com/watch?v="+sourcebackup            
+    chk_link = "https://www.youtube.com/watch?v=" + sourcebackup            
     check = api_utils.load_info(chk_link, resp_type = 'not_json')
-    if not check or "Video unavailable" in check:       # video not available   
-        return False                            
+    if not check or "Video unavailable" in check:                            
+        return False                                     # video not available
     return True
 
 def _get_names(items):

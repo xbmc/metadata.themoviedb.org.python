@@ -68,6 +68,7 @@ class TMDBMovieScraper(object):
 
         # don't specify language to get English text for fallback
         movie_fallback = _get_movie(media_id)
+        movie['images'] = movie_fallback['images']
 
         collection = _get_moviecollection(movie['belongs_to_collection'].get('id'), self.language) if \
             movie['belongs_to_collection'] else None
@@ -140,7 +141,7 @@ def _parse_media_id(title):
 def _get_movie(mid, language=None, search=False):
     details = None if search else \
         'trailers,images,releases,casts,keywords' if language is not None else \
-        'trailers'
+        'trailers,images'
     response = tmdbapi.get_movie(mid, language=language, append_to_response=details)
     theerror = response.get('error')
     if theerror:

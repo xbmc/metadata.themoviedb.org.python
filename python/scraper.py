@@ -122,7 +122,7 @@ def get_details(input_uniqueids, handle, settings):
     listitem = xbmcgui.ListItem(details['info']['title'], offscreen=True)
     listitem.setInfo('video', details['info'])
     listitem.setCast(details['cast'])
-    listitem.setUniqueIDs(details['uniqueids'], 'tmdb')
+    listitem.setUniqueIDs(details['uniqueids'], 'imdb')
     add_artworks(listitem, details['available_art'])
 
     for rating_type, value in details['ratings'].items():

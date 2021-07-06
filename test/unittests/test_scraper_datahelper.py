@@ -140,15 +140,13 @@ https://www.imdb.com/title/tt0076759/
         self._test_find_uniqueids_in_text(input_model, expected_output)
 
     def test_find_uniqueids_in_text__just_url(self):
-        input_model = '''<?xml version='1.0' encoding='utf-8'?>
-https://www.imdb.com/title/tt0076759/
+        input_model = '''https://www.imdb.com/title/tt0076759/
 '''
         expected_output = {'imdb': 'tt0076759'}
         self._test_find_uniqueids_in_text(input_model, expected_output)
 
-    def test_find_uniqueids_in_text__both_urls(self):
-        input_model = '''<?xml version='1.0' encoding='utf-8'?>
-https://www.imdb.com/title/tt0076759/
+    def test_find_uniqueids_in_text__just_both_urls(self):
+        input_model = '''https://www.imdb.com/title/tt0076759/
 https://www.themoviedb.org/movie/11-star-wars
 '''
         expected_output = {'imdb': 'tt0076759', 'tmdb': '11'}

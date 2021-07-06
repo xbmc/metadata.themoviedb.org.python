@@ -11,10 +11,10 @@ jobs:
     name: Kodi addon submitter
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
     - name: Generate distribution zip and submit to official kodi repository
       id: kodi-addon-submitter
-      uses: xbmc/action-kodi-addon-submitter@v1.1
+      uses: xbmc/action-kodi-addon-submitter@v1.2
       with:
         kodi-repository: repo-scrapers
         kodi-version: leia

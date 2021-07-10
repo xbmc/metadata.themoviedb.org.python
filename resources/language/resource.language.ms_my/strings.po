@@ -26,8 +26,8 @@ msgid "themoviedb.org is a free and open movie database. It's completely user dr
 msgstr "themoviedb.org adalah pangkalan data cakera terbuka. Ia sepenuhnya dipacu oleh individu seperti anda. TMDb buat masa ini diguna oleh berjuta-juta individu setiap bulan dan dengan API hebat mereka, ia juga digunakan oleh banyak pusat media popular seperti Kodi untuk mendapatkan Data Meta, Poster, Seni Peminat Cereka untuk memperkayakan pengalaman pengguna."
 
 msgctxt "#30000"
-msgid "Enable Fanart"
-msgstr "Benarkan Seni Peminat"
+msgid "Enable fanart from TMDb"
+msgstr ""
 
 msgctxt "#30001"
 msgid "Prefer Trailer from HD-Trailers.net"
@@ -38,8 +38,8 @@ msgid "Preferred Language"
 msgstr "Bahasa Digemari"
 
 msgctxt "#30003"
-msgid "Get Rating from"
-msgstr "Dapatkan Penarafan dari"
+msgid "Default Rating from"
+msgstr ""
 
 msgctxt "#30004"
 msgid "Enable Trailer (YouTube)"
@@ -52,3 +52,47 @@ msgstr "Kekalkan Tajuk Asal"
 msgctxt "#30006"
 msgid "Preferred Certification Country"
 msgstr "Negara Persijilan Dikehendaki"
+
+msgctxt "#30007"
+msgid "Add also IMDb ratings"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Certification Prefix"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Add multiple studios"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Add also Trakt.tv ratings"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Add keywords as tags"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Separate TMDb fanart with title to landscape"
+msgstr ""
+
+msgctxt "#30100"
+msgid "Language for Fanart.tv artwork"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Fanart.tv personal API key (optional)"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Enable artwork from Fanart.tv"
+msgstr ""
+
+#~ msgctxt "#30000"
+#~ msgid "Enable Fanart"
+#~ msgstr "Benarkan Seni Peminat"
+
+#~ msgctxt "#30003"
+#~ msgid "Get Rating from"
+#~ msgstr "Dapatkan Penarafan dari"

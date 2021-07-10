@@ -26,8 +26,8 @@ msgid "themoviedb.org is a free and open movie database. It's completely user dr
 msgstr "themoviedb.org este o bază de date de filme gratuită și deschisă. Este actualizată de oameni ca și tine. TMDb este curent folosită de milioane de oameni în fiecare lună și datorită API-ului puternic, este de asemena folosită de multe centre media populare ca Kodi pentru a obține informații despre filme, afișe și imagini produse de fani (Fanart) care îmbogățesc experiența utilizatorului."
 
 msgctxt "#30000"
-msgid "Enable Fanart"
-msgstr "Activează Fanart"
+msgid "Enable fanart from TMDb"
+msgstr ""
 
 msgctxt "#30001"
 msgid "Prefer Trailer from HD-Trailers.net"
@@ -38,8 +38,8 @@ msgid "Preferred Language"
 msgstr "Limbă preferată"
 
 msgctxt "#30003"
-msgid "Get Rating from"
-msgstr "Ia rating de la"
+msgid "Default Rating from"
+msgstr ""
 
 msgctxt "#30004"
 msgid "Enable Trailer (YouTube)"
@@ -52,3 +52,47 @@ msgstr "Păstrează titlul original"
 msgctxt "#30006"
 msgid "Preferred Certification Country"
 msgstr "Ţară certificare preferată"
+
+msgctxt "#30007"
+msgid "Add also IMDb ratings"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Certification Prefix"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Add multiple studios"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Add also Trakt.tv ratings"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Add keywords as tags"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Separate TMDb fanart with title to landscape"
+msgstr ""
+
+msgctxt "#30100"
+msgid "Language for Fanart.tv artwork"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Fanart.tv personal API key (optional)"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Enable artwork from Fanart.tv"
+msgstr ""
+
+#~ msgctxt "#30000"
+#~ msgid "Enable Fanart"
+#~ msgstr "Activează Fanart"
+
+#~ msgctxt "#30003"
+#~ msgid "Get Rating from"
+#~ msgstr "Ia rating de la"

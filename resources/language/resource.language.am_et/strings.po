@@ -25,13 +25,25 @@ msgctxt "Addon Description"
 msgid "themoviedb.org is a free and open movie database. It's completely user driven by people like you. TMDb is currently used by millions of people every month and with their powerful API, it is also used by many popular media centers like Kodi to retrieve Movie Metadata, Posters and Fanart to enrich the user's experience."
 msgstr ""
 
+msgctxt "#30000"
+msgid "Enable fanart from TMDb"
+msgstr ""
+
+msgctxt "#30001"
+msgid "Prefer Trailer from HD-Trailers.net"
+msgstr ""
+
 msgctxt "#30002"
 msgid "Preferred Language"
 msgstr "የተመረጠው ቋንቋ"
 
 msgctxt "#30003"
-msgid "Get Rating from"
-msgstr "ደረጃ ያግኙ ከ"
+msgid "Default Rating from"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Enable Trailer (YouTube)"
+msgstr ""
 
 msgctxt "#30005"
 msgid "Keep Original Title"
@@ -40,3 +52,43 @@ msgstr "ዋናውን አርእስት ጠብቅ"
 msgctxt "#30006"
 msgid "Preferred Certification Country"
 msgstr "የተመረጠው የምስክር ወረቀት አገር"
+
+msgctxt "#30007"
+msgid "Add also IMDb ratings"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Certification Prefix"
+msgstr ""
+
+msgctxt "#30009"
+msgid "Add multiple studios"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Add also Trakt.tv ratings"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Add keywords as tags"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Separate TMDb fanart with title to landscape"
+msgstr ""
+
+msgctxt "#30100"
+msgid "Language for Fanart.tv artwork"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Fanart.tv personal API key (optional)"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Enable artwork from Fanart.tv"
+msgstr ""
+
+#~ msgctxt "#30003"
+#~ msgid "Get Rating from"
+#~ msgstr "ደረጃ ያግኙ ከ"

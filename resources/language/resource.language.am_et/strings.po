@@ -17,6 +17,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "X-Generator: Weblate 4.6.2\n"
 
+msgctxt "Addon Summary"
+msgid "Python TMDB Movie Scraper"
+msgstr ""
+
+msgctxt "Addon Description"
+msgid "themoviedb.org is a free and open movie database. It's completely user driven by people like you. TMDb is currently used by millions of people every month and with their powerful API, it is also used by many popular media centers like Kodi to retrieve Movie Metadata, Posters and Fanart to enrich the user's experience."
+msgstr ""
+
 msgctxt "#30002"
 msgid "Preferred Language"
 msgstr "የተመረጠው ቋንቋ"

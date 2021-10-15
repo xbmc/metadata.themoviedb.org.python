@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 from . import tmdbapi
 
 class TMDBMovieScraper(object):
-    def __init__(self, url_settings, language, search_language, certification_country):
+    def __init__(self, url_settings, language, certification_country, search_language='en'):
         self.url_settings = url_settings
         self.language = language
-        self.search_language = search_language
         self.certification_country = certification_country
+        self.search_language = search_language
         self._urls = None
 
     @property

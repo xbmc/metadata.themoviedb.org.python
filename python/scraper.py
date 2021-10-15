@@ -29,16 +29,16 @@ def get_tmdb_scraper(settings):
 def search_for_movie(title, year, handle, settings):
     log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
     title = _strip_trailing_article(title)
-    search_results = get_tmdb_scraper(settings).search(title, year)
+    scraper = get_tmdb_scraper(settings)
 
-    if not search_results:
-        if year is not None:
-            search_results = get_tmdb_scraper(settings).search(title,str(int(year)-1))
-    if not search_results:
-        if year is not None:
-            search_results = get_tmdb_scraper(settings).search(title,str(int(year)+1))
-    if not search_results:
-        search_results = get_tmdb_scraper(settings).search(title)
+    if year is not None:
+        search_results = scraper.search(title, year)
+        if not search_results:
+            search_results = scraper.search(title,str(int(year)-1))
+        if not search_results:
+            search_results = scraper.search(title,str(int(year)+1))
+        if not search_results:
+            search_results = scraper.search(title)
     if not search_results:
         return
     if 'error' in search_results:

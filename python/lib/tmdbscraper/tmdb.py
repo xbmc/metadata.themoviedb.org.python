@@ -1,7 +1,5 @@
 from datetime import datetime, timedelta
 from . import tmdbapi
-import xbmc
-
 
 class TMDBMovieScraper(object):
     def __init__(self, url_settings, language, search_language, certification_country):
@@ -164,11 +162,7 @@ def _parse_artwork(movie, collection, urlbases, language):
     if 'images' in movie:
         posters = _get_images_with_fallback(movie['images']['posters'], urlbases, language)
         landscape = _get_images(movie['images']['backdrops'], urlbases, language)
-        logos = _get_images(movie['images']['logos'], urlbases, language)
-        if not logos:
-            logos = _get_images(movie['images']['logos'], urlbases, None)
-        if not logos:
-            logos = _get_images(movie['images']['logos'], urlbases, "en")
+        logos = _get_images_with_fallback(movie['images']['logos'], urlbases, language)
         fanart = _get_images(movie['images']['backdrops'], urlbases, None)
 
     setposters = []

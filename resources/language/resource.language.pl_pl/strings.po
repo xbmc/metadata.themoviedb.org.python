@@ -77,6 +77,10 @@ msgctxt "#30012"
 msgid "Separate TMDb fanart with title to landscape"
 msgstr "Oddzielne fototapety TMDb z tytułem do krajobrazu"
 
+msgctxt "#30013"
+msgid "Search language"
+msgstr "Język wyszukiwania"
+
 msgctxt "#30100"
 msgid "Language for Fanart.tv artwork"
 msgstr "Język grafiki Fanart.tv"

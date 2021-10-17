@@ -23,12 +23,22 @@ def log(msg, level=xbmc.LOGDEBUG):
 def get_tmdb_scraper(settings):
     language = settings.getSettingString('language')
     certcountry = settings.getSettingString('tmdbcertcountry')
-    return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry)
+    search_language = settings.getSettingString('searchlanguage')
+    return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry, search_language)
 
 def search_for_movie(title, year, handle, settings):
     log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
     title = _strip_trailing_article(title)
-    search_results = get_tmdb_scraper(settings).search(title, year)
+    scraper = get_tmdb_scraper(settings)
+
+    if year is not None:
+        search_results = scraper.search(title, year)
+        if not search_results:
+            search_results = scraper.search(title,str(int(year)-1))
+        if not search_results:
+            search_results = scraper.search(title,str(int(year)+1))
+    if not search_results:
+        search_results = scraper.search(title)
     if not search_results:
         return
     if 'error' in search_results:

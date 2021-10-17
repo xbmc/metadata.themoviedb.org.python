@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Addons\n"
-"Report-Msgid-Bugs-To: translations@kodi.tv\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2021-09-16 13:30+0000\n"
 "Last-Translator: queeup <queeup@zoho.com>\n"
@@ -75,6 +75,10 @@ msgstr "Anahtar kelimeleri etiket olarak ekle"
 
 msgctxt "#30012"
 msgid "Separate TMDb fanart with title to landscape"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Search language"
 msgstr ""
 
 msgctxt "#30100"

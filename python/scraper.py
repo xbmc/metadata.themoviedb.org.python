@@ -31,6 +31,7 @@ def search_for_movie(title, year, handle, settings):
     title = _strip_trailing_article(title)
     scraper = get_tmdb_scraper(settings)
 
+    search_results = None
     search_results = scraper.search(title, year)
     if year is not None:
         if not search_results:

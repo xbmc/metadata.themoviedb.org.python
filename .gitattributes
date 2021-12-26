@@ -2,3 +2,4 @@
 .gitattributes export-ignore
 .github export-ignore
 /test export-ignore
+HOW_TO_RELEASE.md export-ignore

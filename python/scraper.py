@@ -31,7 +31,6 @@ def search_for_movie(title, year, handle, settings):
     title = _strip_trailing_article(title)
     scraper = get_tmdb_scraper(settings)
 
-    search_results = None
     search_results = scraper.search(title, year)
     if year is not None:
         if not search_results:
@@ -127,7 +126,10 @@ def get_details(input_uniqueids, handle, settings):
             settings.getSettingString('fanarttv_clientkey'),
             settings.getSettingString('fanarttv_language'),
             details['_info']['set_tmdbid'])
-        details = combine_scraped_details_available_artwork(details, fanarttv_info)
+        details = combine_scraped_details_available_artwork(details,
+            fanarttv_info,
+            settings.getSettingString('language'),
+            settings)
 
     details = configure_scraped_details(details, settings)
 

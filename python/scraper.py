@@ -13,6 +13,7 @@ from scraper_datahelper import combine_scraped_details_info_and_ratings, \
     combine_scraped_details_available_artwork, find_uniqueids_in_text, get_params
 from scraper_config import configure_scraped_details, PathSpecificSettings, \
     configure_tmdb_artwork, is_fanarttv_configured
+from sanitize_title import sanitize_title
 
 ADDON_SETTINGS = xbmcaddon.Addon()
 ID = ADDON_SETTINGS.getAddonInfo('id')
@@ -39,6 +40,34 @@ def search_for_movie(title, year, handle, settings):
             search_results = scraper.search(title,str(int(year)+1))
         if not search_results:
             search_results = scraper.search(title)
+
+    if not search_results: #try initial sanitization
+        title, year = sanitize_title(title, year)
+        log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
+        search_results = scraper.search(title, str(year))
+        if not search_results:
+            search_results = scraper.search(title)
+    if not search_results: #try stripping "special" words
+        title_s, year = sanitize_title(title, year, False, False, True)
+        log("Find movie with title '{title}' from year '{year}'".format(title=title_s, year=year), xbmc.LOGINFO)
+        search_results = scraper.search(title_s, str(year))
+        if not search_results:
+            search_results = scraper.search(title_s)
+    for i in range(3): #try stripping prefix words
+        if not search_results:
+            title_s2, year = sanitize_title(title, year, True, False, False)
+            log("Find movie with title '{title}' from year '{year}'".format(title=title_s2, year=year), xbmc.LOGINFO)
+            search_results = scraper.search(title_s2, str(year))
+            if not search_results:
+                search_results = scraper.search(title_s2)
+    for i in range(3): #try stripping suffix words
+        if not search_results:
+            title, year = sanitize_title(title, year, False, True, False)
+            log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
+            search_results = scraper.search(title, str(year))
+            if not search_results:
+                search_results = scraper.search(title)
+
     if not search_results:
         return
 

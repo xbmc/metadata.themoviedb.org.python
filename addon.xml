@@ -39,7 +39,7 @@ v1.4.0 (2021-07-10)
       <icon>resources/icon.png</icon>
     </assets>
     <summary lang="af_ZA">TMDB Fliek Skraper</summary>
-    <summary lang="be_BY">TMDB Movie Scraper</summary>
+    <summary lang="be_BY">Сродак для атрымання звестак пра фільмы на аснове TMDB</summary>
     <summary lang="bg_BG">Сваля инф. за филми от TMDB</summary>
     <summary lang="ca_ES">Arreplegador de pel·lícules TMDB</summary>
     <summary lang="cs_CZ">Zdroj zisku dat k filmům TMDB</summary>
@@ -90,6 +90,7 @@ v1.4.0 (2021-07-10)
     <summary lang="zh_CN">TMDB 电影刮削器</summary>
     <summary lang="zh_TW">TMDB 電影搜括器</summary>
     <description lang="af_ZA">themoviedb.org is &apos;n verniet en oop fliek databasis. Dit is totaal gebruiker gedryf deur mense soos jy. TMDB word huidiglik deur miljoene mense elke maand gebruik, en met hulle kragtige API word dit ook deur baie gewilde media sentrums soos Kodi gebruik om Fliek Metadata, Plakkate en Ondersteunerkuns te onttrek om die gebruiker se ondervinding te verryk.</description>
+    <description lang="be_BY">themoviedb.org - бясплатная і адкрытая база даных фільмаў. Яна напаўняецца і падтрымліваецца карыстальнікамі. TMDb штомесяц карыстаюцца мільёны людзей, а дзякуючы магутнаму API базу могуць выкарыстоўваць папулярныя медыяцэнтры накшталт Kodi, якія бяруць адтуль метаданыя, постары і ілюстрацыі.</description>
     <description lang="bg_BG">themoviedb.org е безплатна и отворена филмова база данни. Задвижва се изцяло от потребителите си, от хора като вас. Милиони хора по света всеки месец ползват TMDb. Благодарение на многофункционално API може да се ползва от най-различни и популярни медийни центрове като Kodi, които извличат метаданни, постери и фанарт за филми с цел за красивото оформяне на интерфейса.</description>
     <description lang="ca_ES">themoviedb.org és una base de dades oberta i lliure. Es manté completament per usuaris, per gent com tu. TMDb s&apos;utilitza actualment per milions de persones cada mes i amb la seva potent API també és utilitzada per molts centre media populas com l&apos;Kodi per obtenir les meta-dades de pel·lícules, pósters i fanart per enriquir l&apos;experiència d&apos;usuari.</description>
     <description lang="cs_CZ">themoviedb.org je otevřená a svobodná databáze filmů. Je řízena uživateli, tedy lidmi jako vy. TMDB je každý měsíc používána milióny lidí a se svým výborným API je také používano mnoha populárními mediálními centry jako je Kodi, k získávání metadat, plagátů a fanartu filmů pro obohacení uživatelského zážitku.</description>

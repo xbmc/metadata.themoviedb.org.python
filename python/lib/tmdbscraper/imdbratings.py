@@ -75,8 +75,7 @@ def _parse_imdb_rating_and_votes(input_html):
 
     try:
         aggregateRating = ldjson.get('aggregateRating', {})
-        # old LD-JSON had this as string
-        rating_value = float(aggregateRating.get('ratingValue'))
+        rating_value = aggregateRating.get('ratingValue')
         return rating_value, aggregateRating.get('ratingCount')
     except AttributeError:
         return None, None

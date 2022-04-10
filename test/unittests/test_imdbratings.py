@@ -16,9 +16,6 @@ class TestIMDBRatings(unittest.TestCase):
     def test_parse_imdb_page__goldenpath_2021_06(self):
         self.basetest_loadfilefile_imdb_page_goldenpath("imdb_2021-06.html", (1254540, 8.6, 25))
 
-    def test_parse_imdb_page__goldenpath_2019_08(self):
-        self.basetest_loadfilefile_imdb_page_goldenpath("imdb_2019-08.html", (1133953, 8.6, 24))
-
     def basetest_loadfilefile_imdb_page_goldenpath(self, filename, expected_output):
         with TEST_FOLDER.joinpath(filename).open() as file:
             input_model = file.read()

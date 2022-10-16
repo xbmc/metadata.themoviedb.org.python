@@ -36,6 +36,10 @@ class TMDBMovieScraper(object):
             if 'error' in response:
                 return response
             result = response['results']
+            if response['total_pages'] > 1:
+                response = tmdbapi.search_movie(query=title, year=year, language=self.language, page=2)
+                if not 'error' in response:
+                    result += response['results']
         urls = self.urls
 
         def is_best(item):

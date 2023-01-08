@@ -14,12 +14,12 @@ jobs:
       uses: actions/checkout@v2
     - name: Generate distribution zip and submit to official kodi repository
       id: kodi-addon-submitter
-      uses: xbmc/action-kodi-addon-submitter@v1.2
+      uses: xbmc/action-kodi-addon-submitter@v1.3
       with:
         kodi-repository: repo-scrapers
-        kodi-version: leia
+        kodi-version: matrix
         addon-id: metadata.themoviedb.org.python
-        kodi-matrix: true
+        kodi-matrix: false
       env:
         GH_USERNAME: ${{ github.actor }}
         GH_TOKEN: ${{secrets.GH_TOKEN}}

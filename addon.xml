@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="metadata.themoviedb.org.python"
        name="The Movie Database Python"
-       version="1.6.2"
+       version="2.0.0"
        provider-name="Team Kodi">
   <requires>
     <import addon="xbmc.metadata" version="2.1.0"/>
-    <import addon="xbmc.python" version="2.26.0"/>
+    <import addon="xbmc.python" version="3.0.0"/>
   </requires>
   <extension point="xbmc.metadata.scraper.movies"
              library="python/scraper.py"/>
   <extension point="xbmc.addon.metadata">
     <reuselanguageinvoker>true</reuselanguageinvoker>
-    <news>v1.6.2 (2022-04-10)
-- Fix: IMDB ratings
+    <news>v2.0.0 (2023-01-01)
+- version 2 for Kodi 19 Matrix and above
+- TMDB search second page if no best match on first page
 
-v1.6.0 (2021-12-24) - v1.6.1 (2022-01-09)
+v1.6.0 (2021-12-24) - v1.6.2 (2022-04-10)
 - Feature: fallback to English language for Fanart.tv artwork
-- Feature: fanart prioritization option</news>
+- Feature: fanart prioritization option
+- Fix: IMDB ratings</news>
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <forum>https://forum.kodi.tv/showthread.php?tid=344580</forum>

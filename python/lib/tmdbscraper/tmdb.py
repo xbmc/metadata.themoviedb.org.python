@@ -19,11 +19,10 @@ class TMDBMovieScraper(object):
         return self._urls
 
     def search(self, title, year=None):
-        
         def is_best(item):
-            return item['title'].lower() == title and (
+            return item['title'].lower().encode('utf-8') == title and (
                 not year or item.get('release_date', '').startswith(year))
-        
+
         search_media_id = _parse_media_id(title)
         if search_media_id:
             if search_media_id['type'] == 'tmdb':

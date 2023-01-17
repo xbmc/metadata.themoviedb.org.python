@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: XBMC Addons\n"
 "Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2023-01-10 08:22+0000\n"
-"Last-Translator: zinko layboy <zinkolayboy@gmail.com>\n"
+"PO-Revision-Date: 2023-01-14 18:18+0000\n"
+"Last-Translator: Christian Gade <gade@kodi.tv>\n"
 "Language-Team: Burmese <https://kodi.weblate.cloud/projects/kodi-add-ons-information-providers/metadata-themoviedb-org-python/my_mm/>\n"
 "Language: my_mm\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr "themoviedb.org သည် အခမဲ့ဖြစ်ပြီး ပွ�
 
 msgctxt "#30000"
 msgid "Enable fanart from TMDb"
-msgstr "TMDB မှ  ဖန်အက် ကိုဖွင့်ပါ"
+msgstr "TMDB မှ ဖန်အက် ကိုဖွင့်ပါ"
 
 msgctxt "#30001"
 msgid "Prefer Trailer from HD-Trailers.net"
@@ -63,7 +63,7 @@ msgstr "အမည်အညွှန်းများ"
 
 msgctxt "#30009"
 msgid "Add multiple studios"
-msgstr "စတူဒီယိုများစွာကို ထည့်ပါ။"
+msgstr "စတူဒီယိုများစွာကိုထည့်ပါ"
 
 msgctxt "#30010"
 msgid "Add also Trakt.tv ratings"
@@ -87,15 +87,15 @@ msgstr "Fanart.tv အနုပညာလက်ရာအတွက် ဘာသာ�
 
 msgctxt "#30101"
 msgid "Fanart.tv personal API key (optional)"
-msgstr ""
+msgstr "Fanart.tv ကိုယ်ပိုင် API key (optional)"
 
 msgctxt "#30102"
 msgid "Enable artwork from Fanart.tv"
-msgstr ""
+msgstr "Fanart.tv မှ artwork ကိုဖွင့်ပါ"
 
 msgctxt "#30103"
 msgid "Prioritize Fanart.TV artworks over preferred language"
-msgstr ""
+msgstr "နှစ်သက်ရာ ဘာသာစကားထက် Fanart.TV artworks ကိုဦးစားပေးပါ"
 
 msgctxt "#30999"
 msgid "Fanart.tv"

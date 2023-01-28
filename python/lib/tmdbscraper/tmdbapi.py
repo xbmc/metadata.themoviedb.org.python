@@ -42,7 +42,7 @@ COLLECTION_URL = BASE_URL.format('collection/{}')
 CONFIG_URL = BASE_URL.format('configuration')
 
 
-def search_movie(query, year=None, language=None, page=None):
+def search_movie(query, year=None, language=None, page=None, include_adult=False):
     # type: (Text) -> List[InfoType]
     """
     Search for a movie
@@ -57,6 +57,7 @@ def search_movie(query, year=None, language=None, page=None):
     theurl = SEARCH_URL
     params = _set_params(None, language)
     params['query'] = query
+    params['include_adult'] = 'true' if include_adult else 'false'
     if page is not None:
         params['page'] = page
     if year is not None:

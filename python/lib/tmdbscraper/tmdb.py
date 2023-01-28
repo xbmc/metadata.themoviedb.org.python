@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from . import tmdbapi
 
 class TMDBMovieScraper(object):
-    def __init__(self, url_settings, language, certification_country, search_language=""):
+    def __init__(self, url_settings, language, certification_country, search_language="", include_adult=False):
         self.url_settings = url_settings
         self.language = language
         self.certification_country = certification_country
@@ -11,6 +11,7 @@ class TMDBMovieScraper(object):
         else:
             self.search_language = search_language
         self._urls = None
+        self.include_adult = include_adult
 
     @property
     def urls(self):
@@ -19,11 +20,11 @@ class TMDBMovieScraper(object):
         return self._urls
 
     def search(self, title, year=None):
-        
+
         def is_best(item):
             return item['title'].lower() == title and (
                 not year or item.get('release_date', '').startswith(year))
-        
+
         search_media_id = _parse_media_id(title)
         if search_media_id:
             if search_media_id['type'] == 'tmdb':
@@ -37,7 +38,7 @@ class TMDBMovieScraper(object):
                     return result
                 result = result.get('movie_results')
         else:
-            response = tmdbapi.search_movie(query=title, year=year, language=self.search_language)
+            response = tmdbapi.search_movie(query=title, year=year, language=self.search_language, include_adult=self.include_adult)
             if 'error' in response:
                 return response
             result = response['results']
@@ -45,7 +46,7 @@ class TMDBMovieScraper(object):
             if response['total_pages'] > 1:
                 bests = [item for item in result if is_best(item) and item.get('popularity',0) > 5]
                 if not bests:
-                    response = tmdbapi.search_movie(query=title, year=year, language=self.language, page=2)
+                    response = tmdbapi.search_movie(query=title, year=year, language=self.language, page=2, include_adult=self.include_adult)
                     if not 'error' in response:
                         result += response['results']
         urls = self.urls
@@ -170,7 +171,7 @@ def _parse_artwork(movie, collection, urlbases, language):
     landscape = []
     logos = []
     fanart = []
-    
+
     if 'images' in movie:
         posters = _get_images_with_fallback(movie['images']['posters'], urlbases, language)
         landscape = _get_images(movie['images']['backdrops'], urlbases, language)

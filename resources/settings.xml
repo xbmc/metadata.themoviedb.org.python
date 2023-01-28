@@ -256,6 +256,11 @@
 					<default>true</default>
 					<control type="toggle"/>
 				</setting>
+				<setting id="include_adult" type="boolean" label="30104" help="">
+					<level>0</level>
+					<default>false</default>
+					<control type="toggle"/>
+				</setting>
 				<setting id="lastUpdated" type="string" help="">
 					<level>4</level>
 					<default>0</default>

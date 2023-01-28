@@ -97,6 +97,10 @@ msgctxt "#30103"
 msgid "Prioritize Fanart.TV artworks over preferred language"
 msgstr "Geef prioriteit aan Fanart.TV kunstwerken boven voorkeurstaal"
 
+msgctxt "#30104"
+msgid "Include adult content"
+msgstr "Include adult content"
+
 msgctxt "#30999"
 msgid "Fanart.tv"
 msgstr "Fanart.tv"

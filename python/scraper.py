@@ -24,7 +24,8 @@ def get_tmdb_scraper(settings):
     language = settings.getSettingString('language')
     certcountry = settings.getSettingString('tmdbcertcountry')
     search_language = settings.getSettingString('searchlanguage')
-    return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry, search_language)
+    include_adult = settings.getSettingBool('include_adult')
+    return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry, search_language, include_adult)
 
 def search_for_movie(title, year, handle, settings):
     log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)

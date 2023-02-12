@@ -144,6 +144,7 @@ def _parse_media_id(title):
     if title.startswith('tt') and title[2:].isdigit():
         return {'type': 'imdb', 'id':title} # IMDB ID works alone because it is clear
     title = title.lower()
+    title_has_tmdb_id = re.search('tmdb-(\d+)', title) #regex for TMDB ID in filename strikt pattern
     if title_has_tmdb_id:    #TMDB ID in title
         return {'type': 'tmdb', 'id':int(title_has_tmdb_id.group(1))}
     elif title.startswith('tmdb/'): # TMDB ID

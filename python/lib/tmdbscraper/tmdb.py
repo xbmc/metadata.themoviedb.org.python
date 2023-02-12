@@ -144,7 +144,9 @@ def _parse_media_id(title):
     if title.startswith('tt') and title[2:].isdigit():
         return {'type': 'imdb', 'id':title} # IMDB ID works alone because it is clear
     title = title.lower()
-    if title.startswith('tmdb/') or title.startswith('tmdb-') and title[5:].isdigit(): # TMDB ID
+    if title_has_tmdb_id:    #TMDB ID in title
+        return {'type': 'tmdb', 'id':int(title_has_tmdb_id.group(1))}
+    elif title.startswith('tmdb/'): # TMDB ID
         return {'type': 'tmdb', 'id':title[5:]}
     elif title.startswith('imdb/tt') and title[7:].isdigit(): # IMDB ID with prefix to match
         return {'type': 'imdb', 'id':title[5:]}

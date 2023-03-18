@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Addons\n"
-"Report-Msgid-Bugs-To: translations@kodi.tv\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "PO-Revision-Date: 2023-01-19 19:15+0000\n"
 "Last-Translator: zinko layboy <zinkolayboy@gmail.com>\n"
@@ -80,6 +80,10 @@ msgstr "TMDb fanart ကို အခင်းအကျင်းအဖြစ် �
 msgctxt "#30013"
 msgid "Search language"
 msgstr "ဘာသာစကားရှာဖွေပါ"
+
+msgctxt "#30014"
+msgid "Enable posters from TMDb"
+msgstr ""
 
 msgctxt "#30100"
 msgid "Language for Fanart.tv artwork"

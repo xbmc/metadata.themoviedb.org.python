@@ -81,6 +81,10 @@ msgctxt "#30013"
 msgid "Search language"
 msgstr "Idioma de busca"
 
+msgctxt "#30014"
+msgid "Enable posters from TMDb"
+msgstr ""
+
 msgctxt "#30100"
 msgid "Language for Fanart.tv artwork"
 msgstr "Idioma para artwork de Fanart.tv"

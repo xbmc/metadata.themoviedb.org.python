@@ -63,17 +63,19 @@ def _strip_trailing_article(title):
     return title
 
 def _searchresult_to_listitem(movie):
-    movie_info = {'title': movie['title']}
     movie_label = movie['title']
 
     movie_year = movie['release_date'].split('-')[0] if movie.get('release_date') else None
     if movie_year:
         movie_label += ' ({})'.format(movie_year)
-        movie_info['year'] = movie_year
 
     listitem = xbmcgui.ListItem(movie_label, offscreen=True)
 
-    listitem.setInfo('video', movie_info)
+    infotag = listitem.getVideoInfoTag()
+    infotag.setTitle(movie['title'])
+    if movie_year:
+        infotag.setYear(int(movie_year))
+
     if movie['poster_path']:
         listitem.setArt({'thumb': movie['poster_path']})
 

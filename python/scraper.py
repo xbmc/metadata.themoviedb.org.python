@@ -87,11 +87,12 @@ def _searchresult_to_listitem(movie):
 IMAGE_LIMIT = 10
 
 def add_artworks(listitem, artworks):
+    infotag = listitem.getVideoInfoTag()
     for arttype, artlist in artworks.items():
         if arttype == 'fanart':
             continue
         for image in artlist[:IMAGE_LIMIT]:
-            listitem.addAvailableArtwork(image['url'], arttype)
+            infotag.addAvailableArtwork(image['url'], arttype)
 
     fanart_to_set = [{'image': image['url'], 'preview': image['preview']}
         for image in artworks.get('fanart', ())[:IMAGE_LIMIT]]

@@ -139,19 +139,24 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
     details = configure_scraped_details(details, settings)
 
     listitem = xbmcgui.ListItem(details['info']['title'], offscreen=True)
+    infotag = listitem.getVideoInfoTag()
     listitem.setInfo('video', details['info'])
-    listitem.setCast(details['cast'])
-    listitem.setUniqueIDs(details['uniqueids'], 'tmdb')
+    infotag.setCast(build_cast(details['cast']))
+    infotag.setUniqueIDs(details['uniqueids'], 'tmdb')
+    infotag.setRatings(build_ratings(details['ratings']), find_defaultrating(details['ratings']))
     add_artworks(listitem, details['available_art'])
-
-    for rating_type, value in details['ratings'].items():
-        if 'votes' in value:
-            listitem.setRating(rating_type, value['rating'], value['votes'], value['default'])
-        else:
-            listitem.setRating(rating_type, value['rating'], defaultt=value['default'])
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True
+
+def build_cast(cast_list):
+    return [xbmc.Actor(cast['name'], cast['role'], cast['order'], cast['thumbnail']) for cast in cast_list]
+
+def build_ratings(rating_dict):
+    return {key: (value['rating'], value.get('votes', 0)) for key, value in rating_dict.items()}
+
+def find_defaultrating(rating_dict):
+    return next((key for key, value in rating_dict.items() if value['default']), None)
 
 def find_uniqueids_in_nfo(nfo, handle):
     uniqueids = find_uniqueids_in_text(nfo)

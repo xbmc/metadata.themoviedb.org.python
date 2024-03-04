@@ -140,7 +140,7 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     listitem = xbmcgui.ListItem(details['info']['title'], offscreen=True)
     infotag = listitem.getVideoInfoTag()
-    listitem.setInfo('video', details['info'])
+    set_info(infotag, details['info'])
     infotag.setCast(build_cast(details['cast']))
     infotag.setUniqueIDs(details['uniqueids'], 'tmdb')
     infotag.setRatings(build_ratings(details['ratings']), find_defaultrating(details['ratings']))
@@ -148,6 +148,30 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True
+
+def set_info(infotag: xbmc.InfoTagVideo, info_dict):
+    infotag.setTitle(info_dict['title'])
+    infotag.setOriginalTitle(info_dict['originaltitle'])
+    infotag.setPlot(info_dict['plot'])
+    infotag.setTagLine(info_dict['tagline'])
+    infotag.setStudios(info_dict['studio'])
+    infotag.setGenres(info_dict['genre'])
+    infotag.setCountries(info_dict['country'])
+    infotag.setWriters(info_dict['credits'])
+    infotag.setDirectors(info_dict['director'])
+    infotag.setPremiered(info_dict['premiered'])
+    infotag.setTags(info_dict['tag'])
+    if 'mpaa' in info_dict:
+        infotag.setMpaa(info_dict['mpaa'])
+    if 'trailer' in info_dict:
+        infotag.setTrailer(info_dict['trailer'])
+    if 'set' in info_dict:
+        infotag.setSet(info_dict['set'])
+        infotag.setSetOverview(info_dict['setoverview'])
+    if 'duration' in info_dict:
+        infotag.setDuration(info_dict['duration'])
+    if 'top250' in info_dict:
+        infotag.setTop250(info_dict['top250'])
 
 def build_cast(cast_list):
     return [xbmc.Actor(cast['name'], cast['role'], cast['order'], cast['thumbnail']) for cast in cast_list]

@@ -17,7 +17,7 @@ jobs:
       uses: xbmc/action-kodi-addon-submitter@v1.3
       with:
         kodi-repository: repo-scrapers
-        kodi-version: matrix
+        kodi-version: nexus
         addon-id: metadata.themoviedb.org.python
         kodi-matrix: false
       env:

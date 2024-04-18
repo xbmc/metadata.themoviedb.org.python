@@ -1,3 +1,6 @@
+v3.0.0 (2024-04-17)
+- version 3 for Kodi 20 Nexus and above
+
 v2.2.1 (2024-04-12)
 - Update YouTube plugin URL for trailers
 

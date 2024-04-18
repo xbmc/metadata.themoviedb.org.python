@@ -19,11 +19,11 @@ class TMDBMovieScraper(object):
         return self._urls
 
     def search(self, title, year=None):
-        
+
         def is_best(item):
             return item['title'].lower() == title and (
                 not year or item.get('release_date', '').startswith(year))
-        
+
         search_media_id = _parse_media_id(title)
         if search_media_id:
             if search_media_id['type'] == 'tmdb':
@@ -122,7 +122,7 @@ class TMDBMovieScraper(object):
             info['duration'] = movie['runtime'] * 60
 
         ratings = {'themoviedb': {'rating': float(movie['vote_average']), 'votes': int(movie['vote_count'])}}
-        uniqueids = {'tmdb': movie['id'], 'imdb': movie['imdb_id']}
+        uniqueids = {'tmdb': str(movie['id']), 'imdb': movie['imdb_id']}
         cast = [{
                 'name': actor['name'],
                 'role': actor['character'],

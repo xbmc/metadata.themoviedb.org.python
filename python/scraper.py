@@ -63,17 +63,19 @@ def _strip_trailing_article(title):
     return title
 
 def _searchresult_to_listitem(movie):
-    movie_info = {'title': movie['title']}
     movie_label = movie['title']
 
     movie_year = movie['release_date'].split('-')[0] if movie.get('release_date') else None
     if movie_year:
         movie_label += ' ({})'.format(movie_year)
-        movie_info['year'] = movie_year
 
     listitem = xbmcgui.ListItem(movie_label, offscreen=True)
 
-    listitem.setInfo('video', movie_info)
+    infotag = listitem.getVideoInfoTag()
+    infotag.setTitle(movie['title'])
+    if movie_year:
+        infotag.setYear(int(movie_year))
+
     if movie['poster_path']:
         listitem.setArt({'thumb': movie['poster_path']})
 
@@ -85,11 +87,12 @@ def _searchresult_to_listitem(movie):
 IMAGE_LIMIT = 10
 
 def add_artworks(listitem, artworks):
+    infotag = listitem.getVideoInfoTag()
     for arttype, artlist in artworks.items():
         if arttype == 'fanart':
             continue
         for image in artlist[:IMAGE_LIMIT]:
-            listitem.addAvailableArtwork(image['url'], arttype)
+            infotag.addAvailableArtwork(image['url'], arttype)
 
     fanart_to_set = [{'image': image['url'], 'preview': image['preview']}
         for image in artworks.get('fanart', ())[:IMAGE_LIMIT]]
@@ -136,19 +139,48 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
     details = configure_scraped_details(details, settings)
 
     listitem = xbmcgui.ListItem(details['info']['title'], offscreen=True)
-    listitem.setInfo('video', details['info'])
-    listitem.setCast(details['cast'])
-    listitem.setUniqueIDs(details['uniqueids'], 'tmdb')
+    infotag = listitem.getVideoInfoTag()
+    set_info(infotag, details['info'])
+    infotag.setCast(build_cast(details['cast']))
+    infotag.setUniqueIDs(details['uniqueids'], 'tmdb')
+    infotag.setRatings(build_ratings(details['ratings']), find_defaultrating(details['ratings']))
     add_artworks(listitem, details['available_art'])
-
-    for rating_type, value in details['ratings'].items():
-        if 'votes' in value:
-            listitem.setRating(rating_type, value['rating'], value['votes'], value['default'])
-        else:
-            listitem.setRating(rating_type, value['rating'], defaultt=value['default'])
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True
+
+def set_info(infotag: xbmc.InfoTagVideo, info_dict):
+    infotag.setTitle(info_dict['title'])
+    infotag.setOriginalTitle(info_dict['originaltitle'])
+    infotag.setPlot(info_dict['plot'])
+    infotag.setTagLine(info_dict['tagline'])
+    infotag.setStudios(info_dict['studio'])
+    infotag.setGenres(info_dict['genre'])
+    infotag.setCountries(info_dict['country'])
+    infotag.setWriters(info_dict['credits'])
+    infotag.setDirectors(info_dict['director'])
+    infotag.setPremiered(info_dict['premiered'])
+    infotag.setTags(info_dict['tag'])
+    if 'mpaa' in info_dict:
+        infotag.setMpaa(info_dict['mpaa'])
+    if 'trailer' in info_dict:
+        infotag.setTrailer(info_dict['trailer'])
+    if 'set' in info_dict:
+        infotag.setSet(info_dict['set'])
+        infotag.setSetOverview(info_dict['setoverview'])
+    if 'duration' in info_dict:
+        infotag.setDuration(info_dict['duration'])
+    if 'top250' in info_dict:
+        infotag.setTop250(info_dict['top250'])
+
+def build_cast(cast_list):
+    return [xbmc.Actor(cast['name'], cast['role'], cast['order'], cast['thumbnail']) for cast in cast_list]
+
+def build_ratings(rating_dict):
+    return {key: (value['rating'], value.get('votes', 0)) for key, value in rating_dict.items()}
+
+def find_defaultrating(rating_dict):
+    return next((key for key, value in rating_dict.items() if value['default']), None)
 
 def find_uniqueids_in_nfo(nfo, handle):
     uniqueids = find_uniqueids_in_text(nfo)

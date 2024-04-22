@@ -160,7 +160,8 @@ def set_info(infotag: xbmc.InfoTagVideo, info_dict):
     infotag.setWriters(info_dict['credits'])
     infotag.setDirectors(info_dict['director'])
     infotag.setPremiered(info_dict['premiered'])
-    infotag.setTags(info_dict['tag'])
+    if 'tag' in info_dict:
+        infotag.setTags(info_dict['tag'])
     if 'mpaa' in info_dict:
         infotag.setMpaa(info_dict['mpaa'])
     if 'trailer' in info_dict:

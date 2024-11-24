@@ -1,9 +1,6 @@
-<<<<<<< HEAD
 v3.0.2 (2024-11-24)
 - Added option to choose size of artwork limit
 
-=======
->>>>>>> 8f12c4c0f2862f8b8279b81be26908d83182ce55
 v3.0.1 (2024-04-22)
 - fix scraper error when tags are disabled
 

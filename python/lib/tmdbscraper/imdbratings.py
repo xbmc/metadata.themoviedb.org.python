@@ -32,6 +32,12 @@ IMDB_RATING_REGEX_PREVIOUS = re.compile(r'itemprop="ratingValue".*?>.*?([\d.]+).
 IMDB_VOTES_REGEX_PREVIOUS = re.compile(r'itemprop="ratingCount".*?>.*?([\d,]+).*?<')
 IMDB_TOP250_REGEX_PREVIOUS = re.compile(r'Top Rated Movies #(\d+)')
 
+HEADERS = (
+    ('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'),
+    ('Accept', 'application/json'),
+)
+api_utils.set_headers(dict(HEADERS))
+
 def get_details(uniqueids):
     imdb_id = get_imdb_id(uniqueids)
     if not imdb_id:

@@ -46,6 +46,7 @@ HEADERS = {}
 
 
 def set_headers(headers):
+    HEADERS.clear()
     HEADERS.update(headers)
 
 
@@ -66,7 +67,7 @@ def load_info(url, params=None, default=None, resp_type = 'json'):
     if xbmc:
         xbmc.log('Calling URL "{}"'.format(url), xbmc.LOGDEBUG)
     if HEADERS:
-        logger.debug(str(HEADERS))
+        xbmc.log(str(HEADERS), xbmc.LOGDEBUG)
     req = Request(url, headers=HEADERS)
     try:
         response = urlopen(req)

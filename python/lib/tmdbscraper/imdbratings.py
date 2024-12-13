@@ -36,7 +36,6 @@ HEADERS = (
     ('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'),
     ('Accept', 'application/json'),
 )
-api_utils.set_headers(dict(HEADERS))
 
 def get_details(uniqueids):
     imdb_id = get_imdb_id(uniqueids)
@@ -46,6 +45,7 @@ def get_details(uniqueids):
     return _assemble_imdb_result(votes, rating, top250)
 
 def _get_ratinginfo(imdb_id):
+    api_utils.set_headers(dict(HEADERS))
     response = api_utils.load_info(IMDB_RATINGS_URL.format(imdb_id), default = '', resp_type='text')
     return _parse_imdb_result(response)
 

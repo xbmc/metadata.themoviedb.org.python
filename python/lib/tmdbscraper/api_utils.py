@@ -65,6 +65,8 @@ def load_info(url, params=None, default=None, resp_type = 'json'):
         url = url + '?' + urlencode(params)
     if xbmc:
         xbmc.log('Calling URL "{}"'.format(url), xbmc.LOGDEBUG)
+    if HEADERS:
+        logger.debug(str(HEADERS))
     req = Request(url, headers=HEADERS)
     try:
         response = urlopen(req)

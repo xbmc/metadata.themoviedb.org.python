@@ -299,7 +299,7 @@
 						<step>10</step>
 						<maximum>100</maximum>
 					</constraints>
-				<control type="slider" format="integer" />
+					<control type="slider" format="integer" />
 				</setting>
 			</group>
 		</category>

@@ -5,21 +5,21 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: XBMC Addons\n"
-"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"Report-Msgid-Bugs-To: translations@kodi.tv\n"
 "POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"PO-Revision-Date: 2022-03-07 02:13+0000\n"
-"Last-Translator: Christian Gade <gade@kodi.tv>\n"
-"Language-Team: Chinese (Taiwan) <https://kodi.weblate.cloud/projects/kodi-add-ons-information-providers/metadata-themoviedb-org-python/zh_tw/>\n"
+"PO-Revision-Date: 2025-09-23 10:29+0000\n"
+"Last-Translator: Jeremy Chen <jeremy@naviart.idv.tw>\n"
+"Language-Team: Chinese (Traditional Han script) <https://kodi.weblate.cloud/projects/kodi-add-ons-information-providers/metadata-themoviedb-org-python/zh_Hant/>\n"
 "Language: zh_tw\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.11.2\n"
+"X-Generator: Weblate 5.13.3\n"
 
 msgctxt "Addon Summary"
 msgid "Python TMDB Movie Scraper"
-msgstr "TMDB 電影搜括器"
+msgstr "TMDB 電影資料爬蟲"
 
 msgctxt "Addon Description"
 msgid "themoviedb.org is a free and open movie database. It's completely user driven by people like you. TMDb is currently used by millions of people every month and with their powerful API, it is also used by many popular media centers like Kodi to retrieve Movie Metadata, Posters and Fanart to enrich the user's experience."
@@ -27,7 +27,7 @@ msgstr "themoviedb.org是一個免費和開放的電影資料庫。它是完全�
 
 msgctxt "#30000"
 msgid "Enable fanart from TMDb"
-msgstr ""
+msgstr "啟用 TMDb 美術圖"
 
 msgctxt "#30001"
 msgid "Prefer Trailer from HD-Trailers.net"
@@ -39,7 +39,7 @@ msgstr "偏好的語言"
 
 msgctxt "#30003"
 msgid "Default Rating from"
-msgstr ""
+msgstr "預設評分資料來自"
 
 msgctxt "#30004"
 msgid "Enable Trailer (YouTube)"
@@ -55,7 +55,7 @@ msgstr "偏好的認證國家"
 
 msgctxt "#30007"
 msgid "Add also IMDb ratings"
-msgstr ""
+msgstr "同時取得 IMDb 評分"
 
 msgctxt "#30008"
 msgid "Certification Prefix"
@@ -63,47 +63,47 @@ msgstr "分級前綴"
 
 msgctxt "#30009"
 msgid "Add multiple studios"
-msgstr ""
+msgstr "增加多個製片公司"
 
 msgctxt "#30010"
 msgid "Add also Trakt.tv ratings"
-msgstr ""
+msgstr "同時取得 Trakt.tv 評分"
 
 msgctxt "#30011"
 msgid "Add keywords as tags"
-msgstr ""
+msgstr "增加關鍵字成為標籤"
 
 msgctxt "#30012"
 msgid "Separate TMDb fanart with title to landscape"
-msgstr ""
+msgstr "將含片名的 TMDb 美術圖拆分至橫幅圖"
 
 msgctxt "#30013"
 msgid "Search language"
-msgstr ""
+msgstr "搜尋語言"
 
 msgctxt "#30014"
 msgid "Enable posters from TMDb"
-msgstr ""
+msgstr "啟用 TMDb 海報"
 
 msgctxt "#30015"
 msgid "Maximum number of each artwork type - many artwork can cause an error scraping to MySQL database"
-msgstr ""
+msgstr "每種美術圖的最大數量 - 太多美術圖檔可能會造成收集至 MySQL 資料庫時出現錯誤"
 
 msgctxt "#30100"
 msgid "Language for Fanart.tv artwork"
-msgstr ""
+msgstr "Fanart.tv 美術圖的語言"
 
 msgctxt "#30101"
 msgid "Fanart.tv personal API key (optional)"
-msgstr ""
+msgstr "Fanart.tv 個人 API 金鑰 (非必選)"
 
 msgctxt "#30102"
 msgid "Enable artwork from Fanart.tv"
-msgstr ""
+msgstr "啟用 Fanart.tv 美術圖"
 
 msgctxt "#30103"
 msgid "Prioritize Fanart.TV artworks over preferred language"
-msgstr ""
+msgstr "優先採用 Fanart.tv 的美術圖而非偏好語言"
 
 msgctxt "#30999"
 msgid "Fanart.tv"

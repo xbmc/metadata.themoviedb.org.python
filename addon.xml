@@ -6,12 +6,17 @@
   <requires>
     <import addon="xbmc.metadata" version="2.1.0"/>
     <import addon="xbmc.python" version="3.0.0"/>
+    <import addon="script.module.imdbratings" version="1.0.0"/>
   </requires>
   <extension point="xbmc.metadata.scraper.movies"
              library="python/scraper.py"/>
   <extension point="xbmc.addon.metadata">
     <reuselanguageinvoker>true</reuselanguageinvoker>
-    <news>v3.2.2 (2026-08-19)
+    <news>unreleased
+- use script.module.imdbratings for IMDB ratings and votes
+- IMDB Top 250 is no longer available
+
+v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations
 
 v3.2.1 (2026-06-28)

@@ -19,10 +19,13 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import copy
 import http.client
 import json
 import re
+import threading
 import time
+from collections import OrderedDict
 
 try:
     import xbmc
@@ -120,6 +123,39 @@ def is_not_found(response):
     """True for the error of a request the server answered 404: there is nothing there, which isn't
     a failure, as a lost connection or a 5xx is"""
     return isinstance(response, dict) and response.get('code') == 404
+
+
+# Answers kept for the later calls of an interpreter, which Kodi runs the add-on in again: a set's,
+# which each of its movies asks for
+KEPT_SECONDS = 15 * 60
+KEPT_MOST = 64
+_kept = OrderedDict()
+_kept_lock = threading.Lock()
+
+
+def kept(key, fetch):
+    """fetch()'s answer, or the one it gave for the same key in the last KEPT_SECONDS. An error
+    isn't kept, but a 404 is: there is nothing there."""
+    now = time.monotonic()
+    with _kept_lock:
+        entry = _kept.get(key)
+        if entry and now - entry[0] < KEPT_SECONDS:
+            _kept.move_to_end(key)
+            return copy.deepcopy(entry[1])
+    answer = fetch()
+    if not (isinstance(answer, dict) and 'error' in answer) or is_not_found(answer):
+        with _kept_lock:
+            _kept[key] = (now, copy.deepcopy(answer))
+            _kept.move_to_end(key)
+            while len(_kept) > KEPT_MOST:
+                _kept.popitem(last=False)
+    return answer
+
+
+def forget_kept():
+    """Forgets every answer kept"""
+    with _kept_lock:
+        _kept.clear()
 
 
 def _retry_after(headers):

@@ -34,7 +34,9 @@ def get_details(uniqueids, clientkey, language, set_tmdbid):
     movie_data = _get_data(media_id, clientkey)
     if 'error' in movie_data:
         return movie_data
-    movieset_data = _get_data(set_tmdbid, clientkey) if set_tmdbid else {}
+    # Each movie of a set asks for its art: one request for them all
+    movieset_data = api_utils.kept(('fanart.tv set', set_tmdbid, clientkey),
+                                   lambda: _get_data(set_tmdbid, clientkey)) if set_tmdbid else {}
     if 'error' in movieset_data:
         return movieset_data
     if not movie_data and not movieset_data:

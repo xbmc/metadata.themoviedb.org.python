@@ -10,6 +10,7 @@ unreleased
 - search: the title asked for first, then the year asked for; page 2 in the search language
 - "Plan A" no longer searched as "Plan"
 - use TMDB's image address when its configuration can't be read
+- a set's TMDB details and fanart.tv art asked for once for its movies, not for each
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

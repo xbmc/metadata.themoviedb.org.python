@@ -140,7 +140,9 @@ class TMDBMovieScraper(object):
                 return _failed('the set', collection)
             else:
                 failed = _fill_from_all_images(
-                    collection, lambda: tmdbapi.get_collection_images(collection_id),
+                    collection,
+                    lambda: api_utils.kept(('set images', collection_id),
+                                           lambda: tmdbapi.get_collection_images(collection_id)),
                     ('posters', 'backdrops'))
                 if failed:
                     return failed
@@ -288,9 +290,12 @@ def _get_movie(mid, language=None, search=False, image_languages=None):
 def _get_moviecollection(collection_id, language=None, image_languages=None, with_images=True):
     if not collection_id:
         return None
-    return tmdbapi.get_collection(collection_id, language=language,
-                                  append_to_response='images' if with_images else None,
-                                  image_languages=image_languages if with_images else None)
+    # Each movie of a set asks for it: one request for them all
+    return api_utils.kept(
+        ('set', collection_id, language, image_languages, with_images),
+        lambda: tmdbapi.get_collection(collection_id, language=language,
+                                       append_to_response='images' if with_images else None,
+                                       image_languages=image_languages if with_images else None))
 
 def _parse_artwork(movie, collection, urlbases, language):
     if language:

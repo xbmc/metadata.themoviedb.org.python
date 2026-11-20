@@ -43,10 +43,19 @@ MOVIE_URL = 'https://api.trakt.tv/movies/{}'
 def get_trakt_ratinginfo(uniqueids):
     imdb_id = get_imdb_id(uniqueids)
     result = {}
+    if not imdb_id:
+        # Trakt is asked by IMDb id: without one, don't ask for /movies/None
+        return result
     url = MOVIE_URL.format(imdb_id)
     params = {'extended': 'full'}
     api_utils.set_headers(dict(HEADERS))
-    movie_info = api_utils.load_info(url, params=params, default={})
+    movie_info = api_utils.load_info(url, params=params)
+    # A film Trakt doesn't know (404) has no Trakt rating; a request that fails, after its retry,
+    # fails the details call
+    if api_utils.is_not_found(movie_info):
+        return result
+    if 'error' in movie_info:
+        return movie_info
     if(movie_info):
         if 'votes' in movie_info and 'rating' in movie_info:
             result['ratings'] = {'trakt': {'votes': int(movie_info['votes']), 'rating': float(movie_info['rating'])}}

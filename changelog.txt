@@ -1,6 +1,15 @@
 unreleased
 - use script.module.imdbratings for IMDB ratings and votes
 - IMDB Top 250 is no longer available
+- no notifications: Kodi reports a failed search or details call
+- a part of the details that can't be had (set, English text, images, IMDB or Trakt rating,
+  fanart.tv art) fails the details call, so Kodi tries the movie again; a 404 is not a failure
+- try a failed request once more, with a 15 second timeout; API keys left out of the log
+- one TMDB request for a movie and one for its set, with the images in the add-on's language,
+  in English and without text; English only for text the chosen language lacks
+- search: the title asked for first, then the year asked for; page 2 in the search language
+- "Plan A" no longer searched as "Plan"
+- use TMDB's image address when its configuration can't be read
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

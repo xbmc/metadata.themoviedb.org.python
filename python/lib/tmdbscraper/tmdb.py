@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta
 from . import api_utils, tmdbapi
 
@@ -20,9 +21,19 @@ class TMDBMovieScraper(object):
 
     def search(self, title, year=None):
 
+        def exact_title(item):
+            wanted = title.lower()
+            return ((item.get('title') or '').lower() == wanted or
+                    (item.get('original_title') or '').lower() == wanted)
+
+        def named_as_asked(item):
+            return _same_title(item.get('title'), title) or _same_title(item.get('original_title'), title)
+
+        def released_in_year(item):
+            return bool(year) and (item.get('release_date') or '').startswith(year)
+
         def is_best(item):
-            return item['title'].lower() == title and (
-                not year or item.get('release_date', '').startswith(year))
+            return named_as_asked(item) and (not year or released_in_year(item))
 
         search_media_id = _parse_media_id(title)
         if search_media_id:
@@ -41,19 +52,29 @@ class TMDBMovieScraper(object):
             if 'error' in response:
                 return response
             result = response['results']
-            # get second page if available and if first page doesn't contain an `is_best` result with popularity > 5
+            # Page 2 too, unless page 1 has the title exactly as asked, of the year asked, with a
+            # popularity above 5: a title that matches only without its punctuation may not be it
             if response['total_pages'] > 1:
-                bests = [item for item in result if is_best(item) and item.get('popularity',0) > 5]
+                bests = [item for item in result if exact_title(item) and is_best(item) and
+                         (item.get('popularity') or 0) > 5]
                 if not bests:
-                    response = tmdbapi.search_movie(query=title, year=year, language=self.language, page=2)
-                    if not 'error' in response:
+                    response = tmdbapi.search_movie(query=title, year=year, language=self.search_language, page=2)
+                    if 'error' in response:
+                        api_utils.log_left_out("the search's page 2", response)
+                    else:
                         result += response['results']
         urls = self.urls
 
         if result:
-            # move all `is_best` results at the beginning of the list, sort them by popularity (if found):
-            bests_first = sorted([item for item in result if is_best(item)], key=lambda k: k.get('popularity',0), reverse=True)
-            result = bests_first + [item for item in result if item not in bests_first]
+            # A result named as asked comes first, then one first released in the year asked, then
+            # one whose title is exactly as asked rather than only without its punctuation ("A-B"
+            # before "A B"). TMDb matches the year against any of a movie's release dates, and its
+            # own order can put Part 1 (2010) before Part 2 (2011) for "Part 2" in 2011. Kodi takes
+            # the first result. Among the best, the most popular first; otherwise TMDb's order is
+            # kept.
+            result = sorted(result, key=lambda item: (
+                not named_as_asked(item), not released_in_year(item), not exact_title(item),
+                -(item.get('popularity') or 0) if is_best(item) else 0))
 
         for item in result:
             if item.get('poster_path'):
@@ -208,6 +229,21 @@ class TMDBMovieScraper(object):
 def _parse_original_language(movie):
     first_spoken_language = next(iter(movie.get('spoken_languages', [])), {}).get('iso_639_1')
     return first_spoken_language or movie.get('original_language')
+
+_PUNCTUATION = re.compile(r'[^\w\s]')
+
+def _title_forms(text):
+    """A title's forms to compare: lower case, with punctuation dropped, and as spaces.
+
+    So "Harry Potter and the Deathly Hallows: Part 2" matches "... Hallows Part 2", "Spider-Man"
+    matches "spider man", and "M*A*S*H" matches "mash".
+    """
+    text = text.lower()
+    return {' '.join(_PUNCTUATION.sub('', text).split()),
+            ' '.join(_PUNCTUATION.sub(' ', text).split())}
+
+def _same_title(a, b):
+    return bool(a) and bool(b) and not _title_forms(a).isdisjoint(_title_forms(b))
 
 def _parse_media_id(title):
     if title.startswith('tt') and title[2:].isdigit():

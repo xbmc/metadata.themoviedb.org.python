@@ -9,6 +9,8 @@ unreleased
   still fails is left out and logged
 - fanart.tv and Trakt: a 404 is "nothing there"; a request that still fails leaves out its
   part, logged
+- search: the title asked for first, then the year asked for, then the title exactly as asked;
+  page 2 in the search language
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

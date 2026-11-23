@@ -54,7 +54,8 @@ def search_for_movie(title, year, handle, settings):
         xbmcplugin.addDirectoryItem(handle=handle, url=build_lookup_string(uniqueids),
             listitem=listitem, isFolder=True)
 
-_articles = [prefix + article for prefix in (', ', ' ') for article in ("the", "a", "an")]
+# Only the forms with a comma, as in "Matrix, The": a title such as "Plan A" keeps its last word
+_articles = [', ' + article for article in ("the", "a", "an")]
 def _strip_trailing_article(title):
     title = title.lower()
     for article in _articles:

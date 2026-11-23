@@ -48,8 +48,7 @@ def get_trakt_ratinginfo(uniqueids):
         return result
     url = MOVIE_URL.format(imdb_id)
     params = {'extended': 'full'}
-    api_utils.set_headers(dict(HEADERS))
-    movie_info = api_utils.SESSION.load_info(url, params=params)
+    movie_info = api_utils.SESSION.load_info(url, params=params, headers=dict(HEADERS))
     # A film Trakt doesn't know (404) has no Trakt rating, which isn't a failure; a request that
     # fails, after its retry, gives the caller its error
     if api_utils.is_not_found(movie_info):

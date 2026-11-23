@@ -47,17 +47,11 @@ try:
 except ImportError:
     pass
 
-HEADERS = {}
 _KEY_IN_URL = re.compile(r'(api_?key=)[^&]+', re.IGNORECASE)
 # How a kept connection the server has closed meanwhile shows when it is used
 _CLOSED = (http.client.RemoteDisconnected, http.client.BadStatusLine,
            http.client.CannotSendRequest, ConnectionResetError, ConnectionAbortedError,
            BrokenPipeError, ssl.SSLEOFError, ssl.SSLZeroReturnError)
-
-
-def set_headers(headers):
-    HEADERS.clear()
-    HEADERS.update(headers)
 
 
 class Session(object):
@@ -82,7 +76,7 @@ class Session(object):
         self._ssl_context = None
         self._proxies = None
 
-    def load_info(self, url, params=None, default=None, resp_type='json'):
+    def load_info(self, url, params=None, default=None, resp_type='json', headers=None):
         # type: (Text, Optional[Dict[Text, Union[Text, List[Text]]]]) -> Union[dict, list]
         """
         Load info from external api
@@ -91,17 +85,19 @@ class Session(object):
         :param params: URL query params
         :default: object to return if there is an error
         :resp_type: what to return to the calling function
+        :headers: the request's headers
         :return: API response or default on error
         """
+        headers = headers or {}
         if params:
             url = url + '?' + urlencode(params)
         if xbmc:
             xbmc.log('Calling URL "{}"'.format(_KEY_IN_URL.sub(r'\1...', url)), xbmc.LOGDEBUG)
-            if HEADERS:
+            if headers:
                 # Without the keys: api-key, client-key (the user's own) and trakt-api-key
                 xbmc.log(str({name: '...' if 'key' in name.lower() else value
-                              for name, value in HEADERS.items()}), xbmc.LOGDEBUG)
-        req = Request(url, headers=HEADERS)
+                              for name, value in headers.items()}), xbmc.LOGDEBUG)
+        req = Request(url, headers=headers)
         resp, error = self.fetch(req, json.loads if resp_type.lower() == 'json' else None)
         if error is None:
             return resp

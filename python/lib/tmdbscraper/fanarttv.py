@@ -68,9 +68,8 @@ def _get_data(media_id, clientkey):
     headers = dict(HEADERS)
     if clientkey:
         headers['client-key'] = clientkey
-    api_utils.set_headers(headers)
     fanarttv_url = API_URL.format(media_id)
-    data = api_utils.SESSION.load_info(fanarttv_url)
+    data = api_utils.SESSION.load_info(fanarttv_url, headers=headers)
     # fanart.tv answers 404 for a film it has no art for: no art, which isn't a failure
     if api_utils.is_not_found(data):
         return {}

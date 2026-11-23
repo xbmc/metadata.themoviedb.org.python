@@ -64,9 +64,6 @@ class TestFetch(unittest.TestCase):
                                  side_effect=lambda seconds: self.waits.append(seconds))
         wait.start()
         self.addCleanup(wait.stop)
-        headers = mock.patch.object(api_utils, 'HEADERS', {})
-        headers.start()
-        self.addCleanup(headers.stop)
 
     def load(self, path, *steps, **kwargs):
         self.server.plans[path] = list(steps)
@@ -137,9 +134,10 @@ class TestFetch(unittest.TestCase):
         logs = []
         fake_xbmc = types.SimpleNamespace(LOGDEBUG=0, LOGINFO=1, LOGWARNING=2,
                                           log=lambda msg, level=0: logs.append(msg))
-        api_utils.set_headers({'User-Agent': 'test', 'api-key': 'HEADERKEY', 'client-key': 'MINE'})
+        headers = {'User-Agent': 'test', 'api-key': 'HEADERKEY', 'client-key': 'MINE'}
         with mock.patch.object(api_utils, 'xbmc', fake_xbmc):
-            self.load('/l', ('status', 404), params={'api_key': 'URLKEY', 'q': 'x'})
+            self.load('/l', ('status', 404), params={'api_key': 'URLKEY', 'q': 'x'},
+                      headers=headers)
         text = '\n'.join(logs)
         for key in ('URLKEY', 'HEADERKEY', 'MINE'):
             self.assertNotIn(key, text)

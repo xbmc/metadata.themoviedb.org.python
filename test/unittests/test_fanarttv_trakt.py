@@ -29,7 +29,7 @@ class _Provider(unittest.TestCase):
         self.load_info = load_info.start()
         self.addCleanup(load_info.stop)
 
-    def load_info(self, url, params=None, default=None, resp_type='json'):
+    def load_info(self, url, params=None, default=None, resp_type='json', headers=None):
         return self.answers.get(url, UNREACHABLE)
 
 

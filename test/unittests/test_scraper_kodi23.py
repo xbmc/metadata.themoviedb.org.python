@@ -36,3 +36,33 @@ class TestNoNotification(_Kodi23):
         kodi = self.details(**{MOVIE: None})
         self.assertEqual([], kodi.notifications)
         self.assertTrue(kodi.warnings())
+
+
+class TestAFailureEndsTheCall(_Kodi23):
+    """A failure ends the call with succeeded=False, which Kodi 23 counts as a failed look-up and
+    tries again at its next scan; finding nothing ends it with succeeded=True"""
+
+    def test_a_search_that_finds_succeeds(self):
+        kodi = self.search()
+        self.assertEqual([True], kodi.ended)
+        self.assertEqual(1, len(kodi.items))
+
+    def test_a_search_that_finds_nothing_succeeds(self):
+        kodi = self.search(**{SEARCH: {'total_pages': 0, 'results': []}})
+        self.assertEqual([True], kodi.ended)
+        self.assertEqual([], kodi.items)
+
+    def test_a_failed_search_fails(self):
+        self.assertEqual([False], self.search(**{SEARCH: None}).ended)
+
+    def test_a_failed_page_2_fails_the_search(self):
+        found = kodi_stubs.answers()[SEARCH]['results'][0]
+        page_1 = {'total_pages': 2, 'results': [dict(found, title='Another', original_title='Another')]}
+        kodi = self.search(**{SEARCH: page_1, SEARCH + '|page=2': None})
+        self.assertEqual([False], kodi.ended)
+        self.assertEqual([], kodi.items)
+
+    def test_a_failed_details_call_fails(self):
+        kodi = self.details(**{MOVIE: None})
+        self.assertEqual([False], kodi.ended)
+        self.assertEqual([], kodi.resolved)

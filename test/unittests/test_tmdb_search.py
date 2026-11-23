@@ -100,8 +100,8 @@ class TestSearch(unittest.TestCase):
         self.assertEqual([2, 1], self.ids('a film', '1999', search_language='de-DE'))
         self.assertEqual(['de-DE', 'de-DE'], [language for _, _, language, _ in self.asked])
 
-    def test_a_failed_page_2_keeps_page_1(self):
+    def test_a_failed_page_2_fails_the_search(self):
         self.answer('a film', '1999', result(1, 'Another Film', '1999-01-01', 1.0), total_pages=2)
         self.pages[('a film', '1999', 2)] = UNREACHABLE
-        self.assertEqual([1], self.ids('a film', '1999'))
-        self.assertEqual("the search's page 2", self.left_out.call_args[0][0])
+        scraper = tmdb.TMDBMovieScraper(_Settings(), 'en-US', 'us')
+        self.assertEqual(UNREACHABLE, scraper.search('a film', '1999'))

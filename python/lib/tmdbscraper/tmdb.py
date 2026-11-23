@@ -60,9 +60,9 @@ class TMDBMovieScraper(object):
                 if not bests:
                     response = tmdbapi.search_movie(query=title, year=year, language=self.search_language, page=2)
                     if 'error' in response:
-                        api_utils.log_left_out("the search's page 2", response)
-                    else:
-                        result += response['results']
+                        # the search failed, rather than found less
+                        return response
+                    result += response['results']
         urls = self.urls
 
         if result:

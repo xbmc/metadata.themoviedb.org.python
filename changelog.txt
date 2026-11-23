@@ -18,6 +18,7 @@ unreleased
   connection and TLS handshake for each request
 - no notifications: Kodi 23 reports a failed search or details call itself, and tries it
   again at its next scan
+- a failed search, or details call, ends with succeeded=False; a failed page 2 fails the search
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

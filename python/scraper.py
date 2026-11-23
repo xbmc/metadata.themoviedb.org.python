@@ -27,6 +27,11 @@ def get_tmdb_scraper(settings):
     return TMDBMovieScraper(ADDON_SETTINGS, language, certcountry, search_language)
 
 def search_for_movie(title, year, handle, settings):
+    """List the movies found for a title.
+
+    Returns False when the search failed, so that Kodi can tell a failure from finding nothing;
+    True otherwise, even if nothing was found.
+    """
     log("Find movie with title '{title}' from year '{year}'".format(title=title, year=year), xbmc.LOGINFO)
     title = _strip_trailing_article(title)
     scraper = get_tmdb_scraper(settings)
@@ -40,21 +45,23 @@ def search_for_movie(title, year, handle, settings):
         if not search_results:
             search_results = scraper.search(title)
     if not search_results:
-        return
+        return True
 
     if 'error' in search_results:
-        header = "The Movie Database Python error searching with web service TMDB"
-        xbmcgui.Dialog().notification(header, search_results['error'], xbmcgui.NOTIFICATION_WARNING)
-        log(header + ': ' + search_results['error'], xbmc.LOGWARNING)
-        return
+        # No toast: during a scan Kodi lists a failed look-up in its summary
+        log("The Movie Database Python error searching with web service TMDB: " +
+            search_results['error'], xbmc.LOGWARNING)
+        return False
 
     for movie in search_results:
         listitem = _searchresult_to_listitem(movie)
         uniqueids = {'tmdb': str(movie['id'])}
         xbmcplugin.addDirectoryItem(handle=handle, url=build_lookup_string(uniqueids),
             listitem=listitem, isFolder=True)
+    return True
 
-_articles = [prefix + article for prefix in (', ', ' ') for article in ("the", "a", "an")]
+# Only the forms with a comma, as in "Matrix, The": a title such as "Plan A" keeps its last word
+_articles = [', ' + article for article in ("the", "a", "an")]
 def _strip_trailing_article(title):
     title = title.lower()
     for article in _articles:
@@ -103,17 +110,18 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
     if not details:
         return False
     if 'error' in details:
-        if fail_silently:
-            return False
-        header = "The Movie Database Python error with web service TMDB"
-        xbmcgui.Dialog().notification(header, details['error'], xbmcgui.NOTIFICATION_WARNING)
-        log(header + ': ' + details['error'], xbmc.LOGWARNING)
+        # No toast: a scan lists a failed look-up in its summary
+        if not fail_silently:
+            log("The Movie Database Python error with web service TMDB: " + details['error'],
+                xbmc.LOGWARNING)
         return False
 
     details = configure_tmdb_artwork(details, settings)
 
     if settings.getSettingString('RatingS') == 'IMDb' or settings.getSettingBool('imdbanyway'):
         imdbinfo = get_imdb_details(details['uniqueids'])
+        # A rating that can't be had is left out, logged, rather than fail the call: a low-value
+        # part, whose failures can't always be fixed
         if 'error' in imdbinfo:
             header = "The Movie Database Python error with website IMDB"
             log(header + ': ' + imdbinfo['error'], xbmc.LOGWARNING)
@@ -122,13 +130,19 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     if settings.getSettingString('RatingS') == 'Trakt' or settings.getSettingBool('traktanyway'):
         traktinfo = get_trakt_ratinginfo(details['uniqueids'])
-        details = combine_scraped_details_info_and_ratings(details, traktinfo)
+        if 'error' in traktinfo:
+            log("The Movie Database Python error with website Trakt: " + traktinfo['error'],
+                xbmc.LOGWARNING)
+        else:
+            details = combine_scraped_details_info_and_ratings(details, traktinfo)
 
     if is_fanarttv_configured(settings):
         fanarttv_info = get_fanarttv_artwork(details['uniqueids'],
             settings.getSettingString('fanarttv_clientkey'),
             settings.getSettingString('fanarttv_language'),
             details['_info']['set_tmdbid'])
+        if 'error' in fanarttv_info:
+            return _part_failed('the fanart.tv art', fanarttv_info)
         details = combine_scraped_details_available_artwork(details,
             fanarttv_info,
             settings.getSettingString('language'),
@@ -150,6 +164,16 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True
+
+def _part_failed(what, result):
+    """Fails the details call for a part that couldn't be had, after its request's retry.
+
+    The scan counts a failed look-up, so that the next scan tries the movie again rather than keep
+    it incomplete.
+    """
+    log('{} failed, so the details call fails: {}'.format(what, result.get('error')),
+        xbmc.LOGWARNING)
+    return False
 
 def set_info(infotag: xbmc.InfoTagVideo, info_dict):
     infotag.setTitle(info_dict['title'])
@@ -202,18 +226,29 @@ def parse_lookup_string(uniqueids):
         log("Can't parse this lookup string, is it from another add-on?\n" + uniqueids, xbmc.LOGWARNING)
         return None
 
-def run():
-    params = get_params(sys.argv[1:])
+def run(argv, handle):
+    """One call from Kodi: argv as Kodi passes it to the script, handle the call's.
+
+    Kodi runs the script again for each call, in an interpreter it keeps (reuselanguageinvoker), so
+    what the add-on keeps between calls, such as api_utils.SESSION, lives at module level. A Kodi
+    that imported this module once and called run() for each call would keep it the same way.
+    """
+    params = get_params(argv[1:])
+    params['handle'] = handle
     enddir = True
+    failed = False
     if 'action' in params:
         settings = ADDON_SETTINGS if not params.get('pathSettings') else \
             PathSpecificSettings(json.loads(params['pathSettings']), lambda msg: log(msg, xbmc.LOGWARNING))
         action = params["action"]
         if action == 'find' and 'title' in params:
-            search_for_movie(params["title"], params.get("year"), params['handle'], settings)
+            # A failed search ends with succeeded=False: Kodi counts a failed look-up (and tries
+            # the folder again next scan), rather than a movie it couldn't find
+            failed = not search_for_movie(params["title"], params.get("year"), params['handle'], settings)
         elif action == 'getdetails' and ('url' in params or 'uniqueIDs' in params):
             unique_ids = parse_lookup_string(params.get('uniqueIDs') or params.get('url'))
             enddir = not get_details(unique_ids, params['handle'], settings, fail_silently='uniqueIDs' in params)
+            failed = enddir
         elif action == 'NfoUrl' and 'nfo' in params:
             find_uniqueids_in_nfo(params["nfo"], params['handle'])
         else:
@@ -221,7 +256,7 @@ def run():
     else:
         log("No action in 'params' to act on", xbmc.LOGWARNING)
     if enddir:
-        xbmcplugin.endOfDirectory(params['handle'])
+        xbmcplugin.endOfDirectory(params['handle'], succeeded=not failed)
 
 if __name__ == '__main__':
-    run()
+    run(sys.argv, int(sys.argv[1]))

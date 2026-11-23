@@ -30,8 +30,18 @@ def get_details(uniqueids, clientkey, language, set_tmdbid):
     if not media_id:
         return {}
 
-    movie_data = _get_data(media_id, clientkey)
-    movieset_data = _get_data(set_tmdbid, clientkey) if set_tmdbid else None
+    # A request that fails, after its retry, fails the details call: the caller gets the error.
+    # Another copy or edition of the movie asks for the same art: one request for them all, while
+    # it is kept.
+    movie_data = api_utils.SESSION.kept(('fanart.tv movie', media_id, clientkey),
+                                        lambda: _get_data(media_id, clientkey))
+    if 'error' in movie_data:
+        return movie_data
+    # Each movie of a set asks for its art: one request for them all
+    movieset_data = api_utils.SESSION.kept(('fanart.tv set', set_tmdbid, clientkey),
+                                           lambda: _get_data(set_tmdbid, clientkey)) if set_tmdbid else {}
+    if 'error' in movieset_data:
+        return movieset_data
     if not movie_data and not movieset_data:
         return {}
 
@@ -57,9 +67,12 @@ def _get_data(media_id, clientkey):
     headers = dict(HEADERS)
     if clientkey:
         headers['client-key'] = clientkey
-    api_utils.set_headers(headers)
     fanarttv_url = API_URL.format(media_id)
-    return api_utils.load_info(fanarttv_url, default={})
+    data = api_utils.SESSION.load_info(fanarttv_url, headers=headers)
+    # fanart.tv answers 404 for a film it has no art for: no art, which isn't a failure
+    if api_utils.is_not_found(data):
+        return {}
+    return data
 
 def _parse_data(data, language, language_fallback='en'):
     result = {}

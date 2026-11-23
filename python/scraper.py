@@ -54,7 +54,8 @@ def search_for_movie(title, year, handle, settings):
         xbmcplugin.addDirectoryItem(handle=handle, url=build_lookup_string(uniqueids),
             listitem=listitem, isFolder=True)
 
-_articles = [prefix + article for prefix in (', ', ' ') for article in ("the", "a", "an")]
+# Only the forms with a comma, as in "Matrix, The": a title such as "Plan A" keeps its last word
+_articles = [', ' + article for article in ("the", "a", "an")]
 def _strip_trailing_article(title):
     title = title.lower()
     for article in _articles:
@@ -122,7 +123,11 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     if settings.getSettingString('RatingS') == 'Trakt' or settings.getSettingBool('traktanyway'):
         traktinfo = get_trakt_ratinginfo(details['uniqueids'])
-        details = combine_scraped_details_info_and_ratings(details, traktinfo)
+        if 'error' in traktinfo:
+            log("The Movie Database Python error with website Trakt: " + traktinfo['error'],
+                xbmc.LOGWARNING)
+        else:
+            details = combine_scraped_details_info_and_ratings(details, traktinfo)
 
     if is_fanarttv_configured(settings):
         fanarttv_info = get_fanarttv_artwork(details['uniqueids'],
@@ -202,8 +207,15 @@ def parse_lookup_string(uniqueids):
         log("Can't parse this lookup string, is it from another add-on?\n" + uniqueids, xbmc.LOGWARNING)
         return None
 
-def run():
-    params = get_params(sys.argv[1:])
+def run(argv, handle):
+    """One call from Kodi: argv as Kodi passes it to the script, handle the call's.
+
+    Kodi runs the script again for each call, in an interpreter it keeps (reuselanguageinvoker), so
+    what the add-on keeps between calls, such as api_utils.SESSION, lives at module level. A Kodi
+    that imported this module once and called run() for each call would keep it the same way.
+    """
+    params = get_params(argv[1:])
+    params['handle'] = handle
     enddir = True
     if 'action' in params:
         settings = ADDON_SETTINGS if not params.get('pathSettings') else \
@@ -224,4 +236,4 @@ def run():
         xbmcplugin.endOfDirectory(params['handle'])
 
 if __name__ == '__main__':
-    run()
+    run(sys.argv, int(sys.argv[1]))

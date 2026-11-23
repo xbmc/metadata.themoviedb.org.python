@@ -91,7 +91,7 @@ def find_movie_by_external_id(external_id, language=None):
 
 
 
-def get_movie(mid, language=None, append_to_response=None):
+def get_movie(mid, language=None, append_to_response=None, image_languages=None):
     # type: (Text) -> List[InfoType]
     """
     Get movie details
@@ -99,15 +99,16 @@ def get_movie(mid, language=None, append_to_response=None):
     :param mid: TMDb movie ID
     :param language: the language filter for TMDb (optional)
     :append_to_response: the additional data to get from TMDb (optional)
+    :image_languages: the languages of the images to get, such as 'en,null' (optional)
     :return: the movie or error
     """
     log('using movie id of %s to get movie details' % mid)
     theurl = MOVIE_URL.format(mid)
     api_utils.set_headers(dict(HEADERS))
-    return api_utils.SESSION.load_info(theurl, params=_set_params(append_to_response, language))
+    return api_utils.SESSION.load_info(theurl, params=_set_params(append_to_response, language, image_languages))
 
 
-def get_collection(collection_id, language=None, append_to_response=None):
+def get_collection(collection_id, language=None, append_to_response=None, image_languages=None):
     # type: (Text) -> List[InfoType]
     """
     Get movie collection information
@@ -115,12 +116,39 @@ def get_collection(collection_id, language=None, append_to_response=None):
     :param collection_id: TMDb collection ID
     :param language: the language filter for TMDb (optional)
     :append_to_response: the additional data to get from TMDb (optional)
+    :image_languages: the languages of the images to get, such as 'en,null' (optional)
     :return: the movie or error
     """
     log('using collection id of %s to get collection details' % collection_id)
     theurl = COLLECTION_URL.format(collection_id)
     api_utils.set_headers(dict(HEADERS))
-    return api_utils.SESSION.load_info(theurl, params=_set_params(append_to_response, language))
+    return api_utils.SESSION.load_info(theurl, params=_set_params(append_to_response, language, image_languages))
+
+
+def get_movie_images(mid):
+    # type: (Text) -> InfoType
+    """
+    Get all of a movie's images, in every language
+
+    :param mid: TMDb movie ID
+    :return: the images or error
+    """
+    log('using movie id of %s to get all its images' % mid)
+    api_utils.set_headers(dict(HEADERS))
+    return api_utils.SESSION.load_info(MOVIE_URL.format(mid) + '/images', params=TMDB_PARAMS.copy())
+
+
+def get_collection_images(collection_id):
+    # type: (Text) -> InfoType
+    """
+    Get all of a movie collection's images, in every language
+
+    :param collection_id: TMDb collection ID
+    :return: the images or error
+    """
+    log('using collection id of %s to get all its images' % collection_id)
+    api_utils.set_headers(dict(HEADERS))
+    return api_utils.SESSION.load_info(COLLECTION_URL.format(collection_id) + '/images', params=TMDB_PARAMS.copy())
 
 
 def get_configuration():
@@ -135,10 +163,14 @@ def get_configuration():
     return api_utils.SESSION.load_info(CONFIG_URL, params=TMDB_PARAMS.copy())
 
 
-def _set_params(append_to_response, language):
+def _set_params(append_to_response, language, image_languages=None):
     params = TMDB_PARAMS.copy()
     if language is not None:
         params['language'] = language
     if append_to_response is not None:
         params['append_to_response'] = append_to_response
+    if image_languages is not None:
+        # Without it TMDb filters the images to the request's language, or to en-US when it has
+        # none, so those without text (fanart, keyart) are left out
+        params['include_image_language'] = image_languages
     return params

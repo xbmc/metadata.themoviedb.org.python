@@ -148,6 +148,15 @@ def is_not_found(response):
     return isinstance(response, dict) and response.get('code') == 404
 
 
+def log_left_out(what, response):
+    """Log a part of a movie's details left out because its request failed, after the retry: the
+    movie is added without it, rather than without a word"""
+    if xbmc:
+        reason = (response or {}).get('error') or 'no answer'
+        xbmc.log('[metadata.themoviedb.org.python] {} left out: {}'.format(
+            what, reason.replace('\n', ' ')), xbmc.LOGWARNING)
+
+
 def _stop_requested_during(seconds):
     """Wait, returning True early if Kodi asks the add-on to stop."""
     if xbmc:

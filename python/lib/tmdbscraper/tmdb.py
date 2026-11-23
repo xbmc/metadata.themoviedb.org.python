@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from . import tmdbapi
+from . import api_utils, tmdbapi
 
 class TMDBMovieScraper(object):
     def __init__(self, url_settings, language, certification_country, search_language=""):
@@ -85,28 +85,76 @@ class TMDBMovieScraper(object):
             return details
         return self._assemble_details(**details)
 
+    def _image_languages(self):
+        """The images to ask TMDb for: in the add-on's language, in English, and without text."""
+        languages = []
+        for lang in ((self.language or 'en').split('-')[0], 'en', 'xx', 'null'):
+            if lang not in languages:
+                languages.append(lang)
+        return ','.join(languages)
+
     def _gather_details(self, media_id):
-        movie = _get_movie(media_id, self.language)
+        image_languages = self._image_languages()
+        # One request brings the text in the chosen language, and the images wanted
+        movie = _get_movie(media_id, self.language, image_languages=image_languages)
         if not movie or movie.get('error'):
             return movie
+        # A part that fails, after the request's own retry, is left out and logged: the movie is
+        # added without it
+        failed = _fill_from_all_images(movie, lambda: tmdbapi.get_movie_images(media_id),
+                                       ('posters', 'backdrops', 'logos'))
+        if failed:
+            api_utils.log_left_out("the movie's images in other languages", failed)
 
-        # don't specify language to get English text for fallback
-        movie_fallback = _get_movie(media_id)
-        fallback_images = movie_fallback.get('images')
-        if fallback_images:
-            movie['images'] = fallback_images
+        # English text for what the chosen language lacks. TMDb answers in en-US when a request has
+        # no language, so for en-US another request would only repeat the first.
+        movie_fallback = {}
+        if self.language != ENGLISH and (not movie.get('overview') or not movie.get('tagline') or
+                                         not (movie.get('trailers') or {}).get('youtube')):
+            movie_fallback = tmdbapi.get_movie(media_id, language=ENGLISH, append_to_response='trailers')
+            if api_utils.is_not_found(movie_fallback):
+                # Gone since the first request: no English text, which isn't a failure
+                movie_fallback = {}
+            elif not movie_fallback or 'error' in movie_fallback:
+                api_utils.log_left_out('the English text', movie_fallback)
+                movie_fallback = {}
 
-        collection = _get_moviecollection(movie['belongs_to_collection'].get('id'), self.language) if \
-            movie['belongs_to_collection'] else None
-        collection_fallback = _get_moviecollection(movie['belongs_to_collection'].get('id')) if \
-            movie['belongs_to_collection'] else None
-        if collection and collection_fallback and 'images' in collection_fallback:
-            collection['images'] = collection_fallback['images']
+        collection = None
+        collection_fallback = None
+        if movie['belongs_to_collection']:
+            collection_id = movie['belongs_to_collection'].get('id')
+            # One request, in the chosen language, with the images wanted
+            collection = _get_moviecollection(collection_id, self.language, image_languages)
+            if api_utils.is_not_found(collection):
+                # TMDb no longer has the set: no set, which isn't a failure
+                collection = None
+            elif not collection or 'error' in collection:
+                api_utils.log_left_out('the set', collection)
+                collection = None
+            else:
+                failed = _fill_from_all_images(
+                    collection, lambda: tmdbapi.get_collection_images(collection_id),
+                    ('posters', 'backdrops'))
+                if failed:
+                    api_utils.log_left_out("the set's images in other languages", failed)
+                # English only for what the chosen language lacks
+                if self.language != ENGLISH and (not collection.get('name') or
+                                                 not collection.get('overview')):
+                    collection_fallback = _get_moviecollection(
+                        collection_id, ENGLISH, image_languages, with_images=False)
+                    if api_utils.is_not_found(collection_fallback):
+                        # Gone since the first request: no English text, which isn't a failure
+                        collection_fallback = None
+                    elif not collection_fallback or 'error' in collection_fallback:
+                        api_utils.log_left_out("the set's English name and overview",
+                                               collection_fallback)
+                        collection_fallback = None
 
         return {'movie': movie, 'movie_fallback': movie_fallback, 'collection': collection,
             'collection_fallback': collection_fallback}
 
     def _assemble_details(self, movie, movie_fallback, collection, collection_fallback):
+        collection_fallback = collection_fallback or {}
         info = {
             'title': movie['title'],
             'originaltitle': movie['original_title'],
@@ -177,17 +225,55 @@ def _parse_uniqueids(movie):
         uniqueids['imdb'] = movie['imdb_id']
     return uniqueids
 
-def _get_movie(mid, language=None, search=False):
+# TMDb's default language: it answers a request with no language as if it had asked for this
+ENGLISH = 'en-US'
+
+def _usable(images, kind):
+    """The images of a kind the add-on can use: it skips SVGs."""
+    return [img for img in images.get(kind, []) if not img['file_path'].endswith('.svg')]
+
+def _fill_from_all_images(data, get_all_images, kinds):
+    """Give the kinds of image with none usable in the languages asked those in every language.
+
+    The art takes an image in any language when there is none in the add-on's language or English
+    (_build_image_list_with_fallback()). The images asked for with include_image_language leave
+    those out, so they are asked for again, only when needed: about one movie or set in twenty.
+
+    Returns None, or an error dict if the request for every image failed.
+    """
+    images = data.get('images') or {}
+    lacking = [kind for kind in kinds if not _usable(images, kind)]
+    if not lacking:
+        return None
+    all_images = get_all_images()
+    if api_utils.is_not_found(all_images):
+        return None
+    if not all_images or 'error' in all_images:
+        return _failed('the images in every language', all_images)
+    for kind in lacking:
+        images[kind] = all_images.get(kind, [])
+    data['images'] = images
+    return None
+
+def _failed(what, response):
+    """The error dict for a part of the details that couldn't be had, after its request's retry"""
+    # Without the part's HTTP status: only the movie's own 404 means TMDb has no such movie
+    reason = (response or {}).get('error', 'no answer')
+    return {'error': 'failed to get {}: {}'.format(what, reason)}
+
+def _get_movie(mid, language=None, search=False, image_languages=None):
     details = None if search else \
         'trailers,images,releases,credits,keywords' if language is not None else \
         'trailers,images'
-    return tmdbapi.get_movie(mid, language=language, append_to_response=details)
+    return tmdbapi.get_movie(mid, language=language, append_to_response=details,
+                             image_languages=None if search else image_languages)
 
-def _get_moviecollection(collection_id, language=None):
+def _get_moviecollection(collection_id, language=None, image_languages=None, with_images=True):
     if not collection_id:
         return None
-    details = 'images'
-    return tmdbapi.get_collection(collection_id, language=language, append_to_response=details)
+    return tmdbapi.get_collection(collection_id, language=language,
+                                  append_to_response='images' if with_images else None,
+                                  image_languages=image_languages if with_images else None)
 
 def _parse_artwork(movie, collection, urlbases, language):
     if language:

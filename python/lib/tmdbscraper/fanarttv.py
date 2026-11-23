@@ -59,7 +59,7 @@ def _get_data(media_id, clientkey):
         headers['client-key'] = clientkey
     api_utils.set_headers(headers)
     fanarttv_url = API_URL.format(media_id)
-    return api_utils.load_info(fanarttv_url, default={})
+    return api_utils.SESSION.load_info(fanarttv_url, default={})
 
 def _parse_data(data, language, language_fallback='en'):
     result = {}

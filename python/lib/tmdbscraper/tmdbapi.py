@@ -70,7 +70,7 @@ def search_movie(query, year=None, language=None, page=None):
     if year is not None:
         params['year'] = str(year)
     api_utils.set_headers(dict(HEADERS))
-    return api_utils.load_info(theurl, params=params)
+    return api_utils.SESSION.load_info(theurl, params=params)
 
 
 def find_movie_by_external_id(external_id, language=None):
@@ -87,7 +87,7 @@ def find_movie_by_external_id(external_id, language=None):
     params = _set_params(None, language)
     params['external_source'] = 'imdb_id'
     api_utils.set_headers(dict(HEADERS))
-    return api_utils.load_info(theurl, params=params)
+    return api_utils.SESSION.load_info(theurl, params=params)
 
 
 
@@ -104,7 +104,7 @@ def get_movie(mid, language=None, append_to_response=None):
     log('using movie id of %s to get movie details' % mid)
     theurl = MOVIE_URL.format(mid)
     api_utils.set_headers(dict(HEADERS))
-    return api_utils.load_info(theurl, params=_set_params(append_to_response, language))
+    return api_utils.SESSION.load_info(theurl, params=_set_params(append_to_response, language))
 
 
 def get_collection(collection_id, language=None, append_to_response=None):
@@ -120,7 +120,7 @@ def get_collection(collection_id, language=None, append_to_response=None):
     log('using collection id of %s to get collection details' % collection_id)
     theurl = COLLECTION_URL.format(collection_id)
     api_utils.set_headers(dict(HEADERS))
-    return api_utils.load_info(theurl, params=_set_params(append_to_response, language))
+    return api_utils.SESSION.load_info(theurl, params=_set_params(append_to_response, language))
 
 
 def get_configuration():
@@ -132,7 +132,7 @@ def get_configuration():
     """
     log('getting configuration details')
     api_utils.set_headers(dict(HEADERS))
-    return api_utils.load_info(CONFIG_URL, params=TMDB_PARAMS.copy())
+    return api_utils.SESSION.load_info(CONFIG_URL, params=TMDB_PARAMS.copy())
 
 
 def _set_params(append_to_response, language):

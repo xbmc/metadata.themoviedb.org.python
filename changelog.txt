@@ -1,6 +1,8 @@
 unreleased
 - use script.module.imdbratings for IMDB ratings and votes
 - IMDB Top 250 is no longer available
+- try a failed request once more, honouring a 429's Retry-After (seconds or a date), with a 15
+  second timeout; API keys left out of the log
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

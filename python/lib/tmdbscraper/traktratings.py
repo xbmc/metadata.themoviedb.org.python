@@ -46,7 +46,7 @@ def get_trakt_ratinginfo(uniqueids):
     url = MOVIE_URL.format(imdb_id)
     params = {'extended': 'full'}
     api_utils.set_headers(dict(HEADERS))
-    movie_info = api_utils.load_info(url, params=params, default={})
+    movie_info = api_utils.SESSION.load_info(url, params=params, default={})
     if(movie_info):
         if 'votes' in movie_info and 'rating' in movie_info:
             result['ratings'] = {'trakt': {'votes': int(movie_info['votes']), 'rating': float(movie_info['rating'])}}

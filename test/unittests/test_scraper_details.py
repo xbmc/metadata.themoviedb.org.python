@@ -31,9 +31,9 @@ class TestScraperDetails(unittest.TestCase):
         tag = self.resolved(self.details({'RatingS': 'Trakt'}))
         self.assertEqual('trakt', tag['setRatings'][1])
 
-    def test_failed_fanart_tv_art_is_left_out_and_logged(self):
+    def test_failed_fanart_tv_art_fails_the_call(self):
         kodi = self.details(**{'webservice.fanart.tv/v3/movies/550': None})
-        self.resolved(kodi)
+        self.assertEqual([], kodi.resolved)
         self.assertTrue(any('fanart.tv' in msg for msg in kodi.warnings()), kodi.warnings())
 
     def test_a_failed_movie_request_fails_the_call(self):

@@ -17,9 +17,6 @@ class _Provider(unittest.TestCase):
 
     def setUp(self):
         self.answers = {}
-        left_out = mock.patch.object(api_utils, 'log_left_out')
-        self.left_out = left_out.start()
-        self.addCleanup(left_out.stop)
         # Each test asks afresh, with a session of its own: the add-on keeps answers for its
         # later calls
         session = mock.patch.object(api_utils, 'SESSION', api_utils.Session())
@@ -51,26 +48,19 @@ class TestFanartTV(_Provider):
         art = self.art()
         self.assertNotIn('fanart', art)
         self.assertIn('set.fanart', art)
-        self.left_out.assert_not_called()
 
     def test_the_movie_asked_for_again_is_answered_from_what_was_kept(self):
         self.answers = {self.MOVIE: fanart('A Film', 'm.jpg'), self.SET: fanart('A Set', 's.jpg')}
         self.assertEqual(self.art(), self.art())
         self.assertEqual(2, self.load_info.call_count)  # the movie's and the set's, once each
 
-    def test_a_failed_request_for_the_movie_leaves_out_only_its_art(self):
+    def test_a_failed_request_for_the_movie_fails_the_call(self):
         self.answers = {self.MOVIE: UNREACHABLE, self.SET: fanart('A Set', 's.jpg')}
-        art = self.art()
-        self.assertNotIn('fanart', art)
-        self.assertIn('set.fanart', art)
-        self.assertEqual("fanart.tv's art for the movie", self.left_out.call_args[0][0])
+        self.assertIn('error', fanarttv.get_details({'tmdb': '550'}, '', 'en', '10'))
 
-    def test_a_failed_request_for_the_set_leaves_out_only_its_art(self):
+    def test_a_failed_request_for_the_set_fails_the_call(self):
         self.answers = {self.MOVIE: fanart('A Film', 'm.jpg'), self.SET: UNREACHABLE}
-        art = self.art()
-        self.assertIn('fanart', art)
-        self.assertNotIn('set.fanart', art)
-        self.assertEqual("fanart.tv's art for the set", self.left_out.call_args[0][0])
+        self.assertIn('error', fanarttv.get_details({'tmdb': '550'}, '', 'en', '10'))
 
 
 class TestTrakt(_Provider):

@@ -1,7 +1,7 @@
 import unittest
 import unittest.mock as mock
 
-from python.lib.tmdbscraper import api_utils, tmdb
+from python.lib.tmdbscraper import tmdb
 
 UNREACHABLE = {'error': 'failed to reach the remote site\nReason: timed out'}
 
@@ -27,9 +27,6 @@ class TestSearch(unittest.TestCase):
         search_movie = mock.patch.object(tmdb.tmdbapi, 'search_movie', side_effect=self.search_movie)
         search_movie.start()
         self.addCleanup(search_movie.stop)
-        left_out = mock.patch.object(api_utils, 'log_left_out')
-        self.left_out = left_out.start()
-        self.addCleanup(left_out.stop)
 
     def search_movie(self, query, year=None, language=None, page=None):
         self.asked.append((query, year, language, page))

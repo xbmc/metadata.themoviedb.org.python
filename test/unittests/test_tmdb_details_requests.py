@@ -52,9 +52,6 @@ class TestDetailsRequests(unittest.TestCase):
             patch = mock.patch.object(tmdb.tmdbapi, name, side_effect=getattr(self, name))
             patch.start()
             self.addCleanup(patch.stop)
-        left_out = mock.patch.object(api_utils, 'log_left_out')
-        self.left_out = left_out.start()
-        self.addCleanup(left_out.stop)
         # Each test asks afresh, with a session of its own: the add-on keeps answers for its
         # later calls
         session = mock.patch.object(api_utils, 'SESSION', api_utils.Session())
@@ -155,7 +152,6 @@ class TestDetailsRequests(unittest.TestCase):
         details = self.details('en-US', 1, fail={('collection', 'en-US'): NOT_FOUND})
         self.assertNotIn('error', details)
         self.assertNotIn('set', details['info'])
-        self.left_out.assert_not_called()
 
     def test_an_unusable_logo_asks_for_every_image(self):
         details = self.details('en-US', 3)
@@ -171,42 +167,38 @@ class TestDetailsRequests(unittest.TestCase):
                           ('collection images', None, None, None)], self.calls)
         self.assertArt(details, 'set.poster', '/sp_tr.jpg')
 
-    # A part that fails, after its request's retry, is left out and logged; a 404 for an English
-    # request made after the first is "nothing there", not a failure
+    # A part that fails, after its request's retry, fails the call, with the part named and no
+    # status, as only the movie's own 404 means TMDb has no such movie. A 404 for an English request
+    # made after the first is "nothing there", not a failure
 
-    def test_failed_english_text_is_left_out(self):
-        details = self.details('nl-NL', 1, fail={('movie', 'en-US'): UNREACHABLE})
-        self.assertNotIn('error', details)
-        self.assertEqual('', details['info']['plot'] or '')
-        self.assertEqual('the English text', self.left_out.call_args[0][0])
+    def assertFailed(self, details, what):
+        self.assertIn('error', details)
+        self.assertIn(what, details['error'])
+        self.assertNotIn('code', details)
+
+    def test_failed_english_text_fails_the_call(self):
+        self.assertFailed(self.details('nl-NL', 1, fail={('movie', 'en-US'): UNREACHABLE}),
+                          'the English text')
 
     def test_english_text_gone_since_is_no_failure(self):
-        details = self.details('nl-NL', 1, fail={('movie', 'en-US'): NOT_FOUND})
-        self.assertNotIn('error', details)
-        self.left_out.assert_not_called()
+        self.assertNotIn('error', self.details('nl-NL', 1, fail={('movie', 'en-US'): NOT_FOUND}))
 
-    def test_a_failed_set_is_left_out(self):
-        details = self.details('en-US', 1, fail={('collection', 'en-US'): UNREACHABLE})
-        self.assertNotIn('error', details)
-        self.assertFalse(details['info'].get('set'))
-        self.assertEqual('the set', self.left_out.call_args[0][0])
+    def test_a_failed_set_fails_the_call(self):
+        self.assertFailed(self.details('en-US', 1, fail={('collection', 'en-US'): UNREACHABLE}),
+                          'the set')
 
-    def test_failed_english_set_text_is_left_out(self):
-        details = self.details('nl-NL', 1, fail={('collection', 'en-US'): UNREACHABLE})
-        self.assertNotIn('error', details)
-        self.assertEqual('De Reeks', details['info']['set'])
-        self.assertEqual("the set's English name and overview", self.left_out.call_args[0][0])
+    def test_failed_english_set_text_fails_the_call(self):
+        self.assertFailed(self.details('nl-NL', 1, fail={('collection', 'en-US'): UNREACHABLE}),
+                          "the set's English")
 
     def test_english_set_text_gone_since_is_no_failure(self):
         details = self.details('nl-NL', 1, fail={('collection', 'en-US'): NOT_FOUND})
         self.assertNotIn('error', details)
         self.assertEqual('De Reeks', details['info']['set'])
-        self.left_out.assert_not_called()
 
-    def test_failed_images_in_every_language_are_left_out(self):
-        details = self.details('en-US', 3, fail={('movie images', None): UNREACHABLE})
-        self.assertNotIn('error', details)
-        self.assertEqual("the movie's images in other languages", self.left_out.call_args[0][0])
+    def test_failed_images_in_every_language_fail_the_call(self):
+        self.assertFailed(self.details('en-US', 3, fail={('movie images', None): UNREACHABLE}),
+                          'the images in every language')
 
     # A set's answers are kept for its later movies
 
@@ -257,5 +249,5 @@ class TestDetailsRequests(unittest.TestCase):
                           ('collection', 'en-US', 'images', 'en,xx,null'),
                           ('movie', 'en-US', MOVIE, 'en,xx,null'),
                           ('collection', 'en-US', 'images', 'en,xx,null')], self.calls)
-        self.assertFalse(first['info'].get('set'))
+        self.assertIn('the set', first['error'])
         self.assertEqual('The Set', second['info']['set'])

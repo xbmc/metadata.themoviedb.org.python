@@ -123,15 +123,15 @@ class TMDBMovieScraper(object):
             lambda: _get_movie(media_id, self.language, image_languages=image_languages))
         if not movie or movie.get('error'):
             return movie
-        # A part that fails, after the request's own retry, is left out and logged: the movie is
-        # added without it
+        # Every part asked for must come back: a part that fails, after the request's own retry,
+        # fails the whole call, so that Kodi tries the movie again rather than keep it incomplete
         failed = _fill_from_all_images(
             movie,
             lambda: api_utils.SESSION.kept(('movie images', media_id),
                                            lambda: tmdbapi.get_movie_images(media_id)),
             ('posters', 'backdrops', 'logos'))
         if failed:
-            api_utils.log_left_out("the movie's images in other languages", failed)
+            return failed
 
         # English text for what the chosen language lacks. TMDb answers in en-US when a request has
         # no language, so for en-US another request would only repeat the first.
@@ -145,8 +145,7 @@ class TMDBMovieScraper(object):
                 # Gone since the first request: no English text, which isn't a failure
                 movie_fallback = {}
             elif not movie_fallback or 'error' in movie_fallback:
-                api_utils.log_left_out('the English text', movie_fallback)
-                movie_fallback = {}
+                return _failed('the English text', movie_fallback)
 
         collection = None
         collection_fallback = None
@@ -158,8 +157,7 @@ class TMDBMovieScraper(object):
                 # TMDb no longer has the set: no set, which isn't a failure
                 collection = None
             elif not collection or 'error' in collection:
-                api_utils.log_left_out('the set', collection)
-                collection = None
+                return _failed('the set', collection)
             else:
                 failed = _fill_from_all_images(
                     collection,
@@ -167,7 +165,7 @@ class TMDBMovieScraper(object):
                                                    lambda: tmdbapi.get_collection_images(collection_id)),
                     ('posters', 'backdrops'))
                 if failed:
-                    api_utils.log_left_out("the set's images in other languages", failed)
+                    return failed
                 # English only for what the chosen language lacks
                 if self.language != ENGLISH and (not collection.get('name') or
                                                  not collection.get('overview')):
@@ -177,9 +175,7 @@ class TMDBMovieScraper(object):
                         # Gone since the first request: no English text, which isn't a failure
                         collection_fallback = None
                     elif not collection_fallback or 'error' in collection_fallback:
-                        api_utils.log_left_out("the set's English name and overview",
-                                               collection_fallback)
-                        collection_fallback = None
+                        return _failed("the set's English name and overview", collection_fallback)
 
         return {'movie': movie, 'movie_fallback': movie_fallback, 'collection': collection,
             'collection_fallback': collection_fallback}

@@ -120,6 +120,8 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     if settings.getSettingString('RatingS') == 'IMDb' or settings.getSettingBool('imdbanyway'):
         imdbinfo = get_imdb_details(details['uniqueids'])
+        # A rating that can't be had is left out, logged, rather than fail the call: a low-value
+        # part, whose failures can't always be fixed
         if 'error' in imdbinfo:
             header = "The Movie Database Python error with website IMDB"
             log(header + ': ' + imdbinfo['error'], xbmc.LOGWARNING)
@@ -139,6 +141,8 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
             settings.getSettingString('fanarttv_clientkey'),
             settings.getSettingString('fanarttv_language'),
             details['_info']['set_tmdbid'])
+        if 'error' in fanarttv_info:
+            return _part_failed('the fanart.tv art', fanarttv_info)
         details = combine_scraped_details_available_artwork(details,
             fanarttv_info,
             settings.getSettingString('language'),
@@ -160,6 +164,16 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     xbmcplugin.setResolvedUrl(handle=handle, succeeded=True, listitem=listitem)
     return True
+
+def _part_failed(what, result):
+    """Fails the details call for a part that couldn't be had, after its request's retry.
+
+    The scan counts a failed look-up, so that the next scan tries the movie again rather than keep
+    it incomplete.
+    """
+    log('{} failed, so the details call fails: {}'.format(what, result.get('error')),
+        xbmc.LOGWARNING)
+    return False
 
 def set_info(infotag: xbmc.InfoTagVideo, info_dict):
     infotag.setTitle(info_dict['title'])

@@ -5,10 +5,8 @@ unreleased
   second timeout; API keys left out of the log
 - use TMDB's image address when its configuration can't be read
 - one TMDB request for a movie and one for its set, with the images in the add-on's language,
-  in English and without text; English only for text the chosen language lacks; a part that
-  still fails is left out and logged
-- fanart.tv and Trakt: a 404 is "nothing there"; a request that still fails leaves out its
-  part, logged
+  in English and without text; English only for text the chosen language lacks
+- fanart.tv and Trakt: a 404 is "nothing there"
 - search: the title asked for first, then the year asked for, then the title exactly as asked;
   page 2 in the search language
 - "Plan A" no longer searched as "Plan"
@@ -19,6 +17,9 @@ unreleased
 - no notifications: Kodi 23 reports a failed search or details call itself, and tries it
   again at its next scan
 - a failed search, or details call, ends with succeeded=False; a failed page 2 fails the search
+- a part of the details that can't be had (the set, English text, images, fanart.tv art) fails
+  the details call; a 404 is "nothing there", not a failure; an IMDB or Trakt rating that can't
+  be had is still left out, logged
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

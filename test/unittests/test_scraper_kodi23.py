@@ -66,3 +66,58 @@ class TestAFailureEndsTheCall(_Kodi23):
         kodi = self.details(**{MOVIE: None})
         self.assertEqual([False], kodi.ended)
         self.assertEqual([], kodi.resolved)
+
+
+class TestAPartThatFailsFailsTheCall(_Kodi23):
+    """A part that can't be had after its request's retry fails the details call, so that Kodi 23
+    tries the movie again at its next scan. A 404 is "nothing there": the movie is added without
+    the part."""
+
+    SET = 'api.themoviedb.org/3/collection/10'
+    FANART_MOVIE = 'webservice.fanart.tv/v3/movies/550'
+    FANART_SET = 'webservice.fanart.tv/v3/movies/10'
+    TRAKT = 'api.trakt.tv/movies/tt0137523'
+    GERMAN = {'language': 'de-DE'}
+    # In German, without a plot, so that English is asked for
+    GERMAN_MOVIE = {MOVIE + '|language=de-DE': dict(kodi_stubs.movie(), overview='', tagline='')}
+
+    def assertFails(self, kodi):
+        self.assertEqual([False], kodi.ended)
+        self.assertEqual([], kodi.resolved)
+
+    def assertResolved(self, kodi):
+        self.assertEqual([], kodi.ended)
+        self.assertEqual([True], [ok for ok, _ in kodi.resolved])
+
+    def test_the_set_fails(self):
+        self.assertFails(self.details(**{self.SET: None}))
+
+    def test_the_set_is_gone(self):
+        self.assertResolved(self.details(**{self.SET: 404}))
+
+    def test_the_english_text_fails(self):
+        self.assertFails(self.details(self.GERMAN, **dict(self.GERMAN_MOVIE, **{MOVIE + '|language=en-US': None})))
+
+    def test_the_english_text_is_gone(self):
+        self.assertResolved(self.details(self.GERMAN, **dict(self.GERMAN_MOVIE, **{MOVIE + '|language=en-US': 404})))
+
+    def test_fanart_tv_fails_for_the_movie(self):
+        self.assertFails(self.details(**{self.FANART_MOVIE: None}))
+
+    def test_fanart_tv_fails_for_the_set(self):
+        self.assertFails(self.details(**{self.FANART_SET: None}))
+
+    def test_fanart_tv_has_no_art(self):
+        self.assertResolved(self.details(**{self.FANART_MOVIE: 404, self.FANART_SET: 404}))
+
+    def test_a_failed_trakt_rating_is_left_out(self):
+        self.assertResolved(self.details({'traktanyway': True}, **{self.TRAKT: None}))
+
+    def test_trakt_doesnt_know_it(self):
+        self.assertResolved(self.details({'traktanyway': True}, **{self.TRAKT: 404}))
+
+    def test_imdb_ratings_not_loaded_are_left_out(self):
+        self.assertResolved(self.details({'RatingS': 'IMDb'}, dataset=None, rating=None))
+
+    def test_imdb_has_no_rating_for_it(self):
+        self.assertResolved(self.details({'RatingS': 'IMDb'}, rating=None))

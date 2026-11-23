@@ -16,6 +16,8 @@ unreleased
   movie's once for its copies and editions while kept
 - one connection kept open to each site for the add-on's later calls, rather than a new
   connection and TLS handshake for each request
+- no notifications: Kodi 23 reports a failed search or details call itself, and tries it
+  again at its next scan
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

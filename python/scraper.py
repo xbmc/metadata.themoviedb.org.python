@@ -43,9 +43,9 @@ def search_for_movie(title, year, handle, settings):
         return
 
     if 'error' in search_results:
-        header = "The Movie Database Python error searching with web service TMDB"
-        xbmcgui.Dialog().notification(header, search_results['error'], xbmcgui.NOTIFICATION_WARNING)
-        log(header + ': ' + search_results['error'], xbmc.LOGWARNING)
+        # No toast: during a scan Kodi lists a failed look-up in its summary
+        log("The Movie Database Python error searching with web service TMDB: " +
+            search_results['error'], xbmc.LOGWARNING)
         return
 
     for movie in search_results:
@@ -104,11 +104,10 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
     if not details:
         return False
     if 'error' in details:
-        if fail_silently:
-            return False
-        header = "The Movie Database Python error with web service TMDB"
-        xbmcgui.Dialog().notification(header, details['error'], xbmcgui.NOTIFICATION_WARNING)
-        log(header + ': ' + details['error'], xbmc.LOGWARNING)
+        # No toast: a scan lists a failed look-up in its summary
+        if not fail_silently:
+            log("The Movie Database Python error with web service TMDB: " + details['error'],
+                xbmc.LOGWARNING)
         return False
 
     details = configure_tmdb_artwork(details, settings)

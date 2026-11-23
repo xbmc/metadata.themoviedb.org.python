@@ -116,14 +116,20 @@ class TMDBMovieScraper(object):
 
     def _gather_details(self, media_id):
         image_languages = self._image_languages()
-        # One request brings the text in the chosen language, and the images wanted
-        movie = _get_movie(media_id, self.language, image_languages=image_languages)
+        # One request brings the text in the chosen language, and the images wanted. Another copy
+        # or edition of the movie asks for the same: one request for them all, while it is kept.
+        movie = api_utils.SESSION.kept(
+            ('movie', media_id, self.language, image_languages),
+            lambda: _get_movie(media_id, self.language, image_languages=image_languages))
         if not movie or movie.get('error'):
             return movie
         # A part that fails, after the request's own retry, is left out and logged: the movie is
         # added without it
-        failed = _fill_from_all_images(movie, lambda: tmdbapi.get_movie_images(media_id),
-                                       ('posters', 'backdrops', 'logos'))
+        failed = _fill_from_all_images(
+            movie,
+            lambda: api_utils.SESSION.kept(('movie images', media_id),
+                                           lambda: tmdbapi.get_movie_images(media_id)),
+            ('posters', 'backdrops', 'logos'))
         if failed:
             api_utils.log_left_out("the movie's images in other languages", failed)
 
@@ -132,7 +138,9 @@ class TMDBMovieScraper(object):
         movie_fallback = {}
         if self.language != ENGLISH and (not movie.get('overview') or not movie.get('tagline') or
                                          not (movie.get('trailers') or {}).get('youtube')):
-            movie_fallback = tmdbapi.get_movie(media_id, language=ENGLISH, append_to_response='trailers')
+            movie_fallback = api_utils.SESSION.kept(
+                ('movie', media_id, ENGLISH, 'trailers'),
+                lambda: tmdbapi.get_movie(media_id, language=ENGLISH, append_to_response='trailers'))
             if api_utils.is_not_found(movie_fallback):
                 # Gone since the first request: no English text, which isn't a failure
                 movie_fallback = {}
@@ -154,7 +162,9 @@ class TMDBMovieScraper(object):
                 collection = None
             else:
                 failed = _fill_from_all_images(
-                    collection, lambda: tmdbapi.get_collection_images(collection_id),
+                    collection,
+                    lambda: api_utils.SESSION.kept(('set images', collection_id),
+                                                   lambda: tmdbapi.get_collection_images(collection_id)),
                     ('posters', 'backdrops'))
                 if failed:
                     api_utils.log_left_out("the set's images in other languages", failed)
@@ -307,9 +317,12 @@ def _get_movie(mid, language=None, search=False, image_languages=None):
 def _get_moviecollection(collection_id, language=None, image_languages=None, with_images=True):
     if not collection_id:
         return None
-    return tmdbapi.get_collection(collection_id, language=language,
-                                  append_to_response='images' if with_images else None,
-                                  image_languages=image_languages if with_images else None)
+    # Each movie of a set asks for it: one request for them all
+    return api_utils.SESSION.kept(
+        ('set', collection_id, language, image_languages, with_images),
+        lambda: tmdbapi.get_collection(collection_id, language=language,
+                                       append_to_response='images' if with_images else None,
+                                       image_languages=image_languages if with_images else None))
 
 def _parse_artwork(movie, collection, urlbases, language):
     if language:

@@ -12,6 +12,8 @@ unreleased
 - search: the title asked for first, then the year asked for, then the title exactly as asked;
   page 2 in the search language
 - "Plan A" no longer searched as "Plan"
+- a set's TMDB details and fanart.tv art asked for once for its movies, not for each, and a
+  movie's once for its copies and editions while kept
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

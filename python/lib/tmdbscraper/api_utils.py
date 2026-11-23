@@ -19,10 +19,13 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import copy
 import http.client
 import json
 import re
+import threading
 import time
+from collections import OrderedDict
 from email.utils import parsedate_to_datetime
 
 try:
@@ -51,16 +54,22 @@ def set_headers(headers):
 
 
 class Session(object):
-    """The add-on's requests: each tried once more after a failure that may pass.
+    """The add-on's requests: each tried once more after a failure that may pass, and answers kept
+    a while for the later calls (kept()).
 
     Kodi runs the add-on's calls in an interpreter it keeps for them (reuselanguageinvoker), so one
     instance, SESSION, serves them all.
     """
 
-    def __init__(self, timeout=15, retry_pause=1.0, max_retry_after=30):
+    def __init__(self, timeout=15, retry_pause=1.0, max_retry_after=30, keep_seconds=15 * 60,
+                 keep_most=64):
         self.timeout = timeout  # seconds, for connecting and for each read
         self.retry_pause = retry_pause  # seconds before the one retry
         self.max_retry_after = max_retry_after  # the longest Retry-After honoured, in seconds
+        self.keep_seconds = keep_seconds  # how long an answer is kept
+        self.keep_most = keep_most  # how many answers are kept
+        self._kept = OrderedDict()
+        self._kept_lock = threading.Lock()
 
     def load_info(self, url, params=None, default=None, resp_type='json'):
         # type: (Text, Optional[Dict[Text, Union[Text, List[Text]]]]) -> Union[dict, list]
@@ -123,6 +132,30 @@ class Session(object):
             if attempt == 1 and retry and not _stop_requested_during(delay):
                 continue
             return None, error
+
+    def kept(self, key, fetch):
+        """fetch()'s answer, or the one it gave for the same key in the last keep_seconds: for the
+        later calls of the interpreter, such as each movie of a set asking for the set. An error
+        isn't kept, but a 404 is: there is nothing there."""
+        now = time.monotonic()
+        with self._kept_lock:
+            entry = self._kept.get(key)
+            if entry and now - entry[0] < self.keep_seconds:
+                self._kept.move_to_end(key)
+                return copy.deepcopy(entry[1])
+        answer = fetch()
+        if not (isinstance(answer, dict) and 'error' in answer) or is_not_found(answer):
+            with self._kept_lock:
+                self._kept[key] = (now, copy.deepcopy(answer))
+                self._kept.move_to_end(key)
+                while len(self._kept) > self.keep_most:
+                    self._kept.popitem(last=False)
+        return answer
+
+    def forget(self):
+        """Forgets every answer kept"""
+        with self._kept_lock:
+            self._kept.clear()
 
     def _retry_after(self, headers):
         """Seconds a 429 answer asks to wait, within limits. Retry-After is a number of seconds or

@@ -55,6 +55,11 @@ class TestDetailsRequests(unittest.TestCase):
         left_out = mock.patch.object(api_utils, 'log_left_out')
         self.left_out = left_out.start()
         self.addCleanup(left_out.stop)
+        # Each test asks afresh, with a session of its own: the add-on keeps answers for its
+        # later calls
+        session = mock.patch.object(api_utils, 'SESSION', api_utils.Session())
+        session.start()
+        self.addCleanup(session.stop)
 
     def get_movie(self, mid, language=None, append_to_response=None, image_languages=None):
         self.calls.append(('movie', language, append_to_response, image_languages))
@@ -203,3 +208,54 @@ class TestDetailsRequests(unittest.TestCase):
         self.assertNotIn('error', details)
         self.assertEqual("the movie's images in other languages", self.left_out.call_args[0][0])
 
+    # A set's answers are kept for its later movies
+
+    def two_of_a_set(self, fail_first=None):
+        """Movies 1 and 5, both of set 77, in turn, in one interpreter"""
+        scraper = tmdb.TMDBMovieScraper(_Settings(), 'en-US', 'us')
+        self.failing.update(fail_first or {})
+        first = scraper.get_details({'tmdb': '1'})
+        self.failing.clear()
+        return first, scraper.get_details({'tmdb': '5'})
+
+    def test_two_movies_of_a_set_ask_for_it_once(self):
+        first, second = self.two_of_a_set()
+        self.assertEqual([('movie', 'en-US', MOVIE, 'en,xx,null'),
+                          ('collection', 'en-US', 'images', 'en,xx,null'),
+                          ('movie', 'en-US', MOVIE, 'en,xx,null')], self.calls)
+        self.assertEqual('The Set', first['info']['set'])
+        self.assertEqual('The Set', second['info']['set'])
+        self.assertArt(second, 'set.fanart', '/b_none.jpg')
+
+    # So are a movie's, for another copy or edition of it
+
+    def test_a_movie_asked_for_again_is_answered_from_what_was_kept(self):
+        scraper = tmdb.TMDBMovieScraper(_Settings(), 'en-US', 'us')
+        first = scraper.get_details({'tmdb': '1'})
+        second = scraper.get_details({'tmdb': '1'})
+        self.assertEqual([('movie', 'en-US', MOVIE, 'en,xx,null'),
+                          ('collection', 'en-US', 'images', 'en,xx,null')], self.calls)
+        self.assertEqual(first['info'], second['info'])
+        self.assertEqual(first['available_art'], second['available_art'])
+
+    def test_a_movie_in_another_language_is_asked_for(self):
+        tmdb.TMDBMovieScraper(_Settings(), 'en-US', 'us').get_details({'tmdb': '1'})
+        tmdb.TMDBMovieScraper(_Settings(), 'de-DE', 'us').get_details({'tmdb': '1'})
+        self.assertEqual(2, [kind for kind, *_ in self.calls].count('movie'))
+
+    def test_a_movie_that_failed_is_asked_for_again(self):
+        scraper = tmdb.TMDBMovieScraper(_Settings(), 'en-US', 'us')
+        self.failing[('movie', 'en-US')] = UNREACHABLE
+        self.assertIn('error', scraper.get_details({'tmdb': '1'}))
+        self.failing.clear()
+        self.assertNotIn('error', scraper.get_details({'tmdb': '1'}))
+        self.assertEqual(2, [kind for kind, *_ in self.calls].count('movie'))
+
+    def test_a_set_that_failed_is_asked_for_again_by_the_next_movie(self):
+        first, second = self.two_of_a_set(fail_first={('collection', 'en-US'): UNREACHABLE})
+        self.assertEqual([('movie', 'en-US', MOVIE, 'en,xx,null'),
+                          ('collection', 'en-US', 'images', 'en,xx,null'),
+                          ('movie', 'en-US', MOVIE, 'en,xx,null'),
+                          ('collection', 'en-US', 'images', 'en,xx,null')], self.calls)
+        self.assertFalse(first['info'].get('set'))
+        self.assertEqual('The Set', second['info']['set'])

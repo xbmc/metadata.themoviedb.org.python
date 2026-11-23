@@ -231,4 +231,4 @@ def run(scraper, *params):
     """scraper.run() for a call, as Kodi makes it: plugin://..., handle 1, ?query"""
     with mock.patch.object(sys, 'argv', ['plugin://metadata.themoviedb.org.python/', '1',
                                          '?' + '&'.join(params)]):
-        scraper.run()
+        scraper.run(sys.argv, 1)

@@ -21,8 +21,11 @@ from __future__ import absolute_import, unicode_literals
 
 import copy
 import http.client
+import io
 import json
 import re
+import select
+import ssl
 import threading
 import time
 from collections import OrderedDict
@@ -35,9 +38,9 @@ except ModuleNotFoundError:
     xbmc = None
 
 # from pprint import pformat
-from urllib.request import Request, urlopen
+from urllib.request import Request, getproxies, proxy_bypass, urlopen
 from urllib.error import HTTPError
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 try:
     from typing import Text, Optional, Union, List, Dict, Any  # pylint: disable=unused-import
     InfoType = Dict[Text, Any]  # pylint: disable=invalid-name
@@ -46,6 +49,10 @@ except ImportError:
 
 HEADERS = {}
 _KEY_IN_URL = re.compile(r'(api_?key=)[^&]+', re.IGNORECASE)
+# How a kept connection the server has closed meanwhile shows when it is used
+_CLOSED = (http.client.RemoteDisconnected, http.client.BadStatusLine,
+           http.client.CannotSendRequest, ConnectionResetError, ConnectionAbortedError,
+           BrokenPipeError, ssl.SSLEOFError, ssl.SSLZeroReturnError)
 
 
 def set_headers(headers):
@@ -54,8 +61,8 @@ def set_headers(headers):
 
 
 class Session(object):
-    """The add-on's requests: each tried once more after a failure that may pass, and answers kept
-    a while for the later calls (kept()).
+    """The add-on's requests: each tried once more after a failure that may pass, answers kept a
+    while for the later calls (kept()), and one connection kept open to each site.
 
     Kodi runs the add-on's calls in an interpreter it keeps for them (reuselanguageinvoker), so one
     instance, SESSION, serves them all.
@@ -70,6 +77,10 @@ class Session(object):
         self.keep_most = keep_most  # how many answers are kept
         self._kept = OrderedDict()
         self._kept_lock = threading.Lock()
+        self._connections = {}  # (scheme, host, port) -> connection
+        self._connections_lock = threading.Lock()
+        self._ssl_context = None
+        self._proxies = None
 
     def load_info(self, url, params=None, default=None, resp_type='json'):
         # type: (Text, Optional[Dict[Text, Union[Text, List[Text]]]]) -> Union[dict, list]
@@ -109,8 +120,7 @@ class Session(object):
         for attempt in (1, 2):
             delay = self.retry_pause
             try:
-                with urlopen(req, timeout=timeout) as response:
-                    body = response.read().decode('utf-8')
+                body = self._send(req, timeout).decode('utf-8')
                 return (parse(body) if parse else body), None
             except HTTPError as e:  # before URLError, of which it is a kind
                 error = {'error': 'remote site unable to fulfill the request\nError code: {}'.format(
@@ -156,6 +166,117 @@ class Session(object):
         """Forgets every answer kept"""
         with self._kept_lock:
             self._kept.clear()
+
+    def close(self):
+        """Closes every connection kept open"""
+        with self._connections_lock:
+            kept_now = list(self._connections.values())
+            self._connections.clear()
+        for conn in kept_now:
+            conn.close()
+
+    def _send(self, req, timeout):
+        """The body of a request's answer, on a connection kept open to its site. An error status
+        raises HTTPError, as urlopen() does."""
+        parts = urlsplit(req.full_url)
+        scheme, host = parts.scheme.lower(), parts.hostname
+        if scheme not in ('http', 'https') or not host or self._proxied(scheme, host):
+            with urlopen(req, timeout=timeout) as response:
+                return response.read()
+        key = (scheme, host, parts.port)
+        target = (parts.path or '/') + ('?' + parts.query if parts.query else '')
+        headers = dict(req.header_items())
+        body = req.data
+        if body is not None and not any(name.lower() == 'content-type' for name in headers):
+            headers['Content-Type'] = 'application/x-www-form-urlencoded'  # as urlopen() sends
+        for fresh in (False, True):
+            conn = None if fresh else self._kept_connection(key, timeout)
+            reused = conn is not None
+            if conn is None:
+                conn = self._new_connection(scheme, host, parts.port, timeout)
+            try:
+                conn.request(req.get_method(), target, body=body, headers=headers)
+                response = conn.getresponse()
+            except _CLOSED:
+                conn.close()
+                if reused:
+                    # The server closed it while it was kept: sent again on a new connection,
+                    # which isn't the request's one retry
+                    continue
+                raise
+            except BaseException:
+                conn.close()
+                raise
+            if response.status >= 400:
+                # The status comes with the headers, whatever the body does after them. Only a
+                # connection with no body to drain is kept.
+                if response.length == 0 and not response.will_close:
+                    response.close()
+                    self._keep(key, conn)
+                else:
+                    response.close()
+                    conn.close()
+                raise HTTPError(req.full_url, response.status, response.reason, response.headers,
+                                io.BytesIO(b''))
+            try:
+                raw = response.read()
+            except BaseException:
+                conn.close()
+                raise
+            if response.will_close:
+                conn.close()
+            else:
+                self._keep(key, conn)
+            if 300 <= response.status < 400 and response.status != 304:
+                # A redirect, which urlopen() follows
+                with urlopen(req, timeout=timeout) as redirected:
+                    return redirected.read()
+            return raw
+
+    def _kept_connection(self, key, timeout):
+        """The connection kept open to a site, unless the server has closed it meanwhile"""
+        with self._connections_lock:
+            conn = self._connections.pop(key, None)
+        if conn is None:
+            return None
+        # Readable while no answer is awaited: the server has closed it
+        try:
+            closed = conn.sock is None or bool(select.select([conn.sock], [], [], 0)[0])
+        except (OSError, ValueError):
+            closed = True
+        if closed:
+            conn.close()
+            return None
+        conn.timeout = timeout
+        conn.sock.settimeout(timeout)
+        return conn
+
+    def _keep(self, key, conn):
+        with self._connections_lock:
+            other = self._connections.pop(key, None)
+            self._connections[key] = conn
+        if other is not None:
+            other.close()
+
+    def _new_connection(self, scheme, host, port, timeout):
+        if scheme == 'https':
+            if self._ssl_context is None:
+                self._ssl_context = ssl.create_default_context()
+            conn = http.client.HTTPSConnection(host, port, timeout=timeout, context=self._ssl_context)
+        else:
+            conn = http.client.HTTPConnection(host, port, timeout=timeout)
+        try:
+            conn.connect()
+        except BaseException:
+            conn.close()
+            raise
+        return conn
+
+    def _proxied(self, scheme, host):
+        """True when the system has a proxy for the site, which urlopen() goes through"""
+        if self._proxies is None:
+            self._proxies = getproxies()
+        return scheme in self._proxies and not proxy_bypass(host)
 
     def _retry_after(self, headers):
         """Seconds a 429 answer asks to wait, within limits. Retry-After is a number of seconds or

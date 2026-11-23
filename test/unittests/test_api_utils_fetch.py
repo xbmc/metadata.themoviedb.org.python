@@ -59,6 +59,7 @@ class TestFetch(unittest.TestCase):
         self.url = 'http://127.0.0.1:{}'.format(self.server.server_address[1])
         self.waits = []
         self.session = api_utils.Session(timeout=0.5)
+        self.addCleanup(self.session.close)
         wait = mock.patch.object(api_utils, '_stop_requested_during',
                                  side_effect=lambda seconds: self.waits.append(seconds))
         wait.start()

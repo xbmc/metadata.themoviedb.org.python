@@ -14,6 +14,8 @@ unreleased
 - "Plan A" no longer searched as "Plan"
 - a set's TMDB details and fanart.tv art asked for once for its movies, not for each, and a
   movie's once for its copies and editions while kept
+- one connection kept open to each site for the add-on's later calls, rather than a new
+  connection and TLS handshake for each request
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

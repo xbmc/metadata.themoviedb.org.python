@@ -253,21 +253,38 @@ def _build_image_list(imagelist, urlbases, languages=[]):
 def _get_date_numeric(datetime_):
     return (datetime_ - datetime(1970, 1, 1)).total_seconds()
 
+# TMDb's documented image base, used when its configuration can't be read
+TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/'
+
 def _load_base_urls(url_settings):
     urls = {}
     urls['original'] = url_settings.getSettingString('originalUrl')
     urls['preview'] = url_settings.getSettingString('previewUrl')
     last_updated = url_settings.getSettingString('lastUpdated')
-    if not urls['original'] or not urls['preview'] or not last_updated or \
-            float(last_updated) < _get_date_numeric(datetime.now() - timedelta(days=30)):
-        conf = tmdbapi.get_configuration()
-        if conf:
-            urls['original'] = conf['images']['secure_base_url'] + 'original'
-            urls['preview'] = conf['images']['secure_base_url'] + 'w780'
-            url_settings.setSetting('originalUrl', urls['original'])
-            url_settings.setSetting('previewUrl', urls['preview'])
-            url_settings.setSetting('lastUpdated', str(_get_date_numeric(datetime.now())))
-    return urls
+    try:
+        stale = float(last_updated) < _get_date_numeric(datetime.now() - timedelta(days=30))
+    except ValueError:
+        stale = True
+    if urls['original'] and urls['preview'] and not stale:
+        return urls
+    conf = tmdbapi.get_configuration()
+    base = None
+    if conf and 'error' not in conf:
+        base = (conf.get('images') or {}).get('secure_base_url')
+    if not base:
+        # Rather than fail the call: the URLs stored, or TMDb's documented base. Nothing is
+        # saved, so a later call asks TMDb again.
+        if urls['original'] and urls['preview']:
+            return urls
+        return {'original': TMDB_IMAGE_BASE + 'original', 'preview': TMDB_IMAGE_BASE + 'w780'}
+    fetched = {'original': base + 'original', 'preview': base + 'w780'}
+    # Each setSetting() saves the add-on's settings, which interpreters running at once share:
+    # save the URLs only when they have changed
+    if fetched != urls:
+        url_settings.setSetting('originalUrl', fetched['original'])
+        url_settings.setSetting('previewUrl', fetched['preview'])
+    url_settings.setSetting('lastUpdated', str(_get_date_numeric(datetime.now())))
+    return fetched
 
 def _parse_trailer(trailers, fallback):
     if trailers.get('youtube'):

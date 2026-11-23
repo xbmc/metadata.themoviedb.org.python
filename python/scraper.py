@@ -122,7 +122,11 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
 
     if settings.getSettingString('RatingS') == 'Trakt' or settings.getSettingBool('traktanyway'):
         traktinfo = get_trakt_ratinginfo(details['uniqueids'])
-        details = combine_scraped_details_info_and_ratings(details, traktinfo)
+        if 'error' in traktinfo:
+            log("The Movie Database Python error with website Trakt: " + traktinfo['error'],
+                xbmc.LOGWARNING)
+        else:
+            details = combine_scraped_details_info_and_ratings(details, traktinfo)
 
     if is_fanarttv_configured(settings):
         fanarttv_info = get_fanarttv_artwork(details['uniqueids'],

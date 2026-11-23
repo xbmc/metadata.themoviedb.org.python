@@ -7,6 +7,8 @@ unreleased
 - one TMDB request for a movie and one for its set, with the images in the add-on's language,
   in English and without text; English only for text the chosen language lacks; a part that
   still fails is left out and logged
+- fanart.tv and Trakt: a 404 is "nothing there"; a request that still fails leaves out its
+  part, logged
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

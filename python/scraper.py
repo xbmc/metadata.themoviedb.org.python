@@ -7,7 +7,6 @@ import xbmcplugin
 
 from lib.tmdbscraper.tmdb import TMDBMovieScraper
 from lib.tmdbscraper.fanarttv import get_details as get_fanarttv_artwork
-from lib.tmdbscraper.imdbratings import get_details as get_imdb_details
 from lib.tmdbscraper.traktratings import get_trakt_ratinginfo
 from scraper_datahelper import combine_scraped_details_info_and_ratings, \
     combine_scraped_details_available_artwork, find_uniqueids_in_text, get_params
@@ -114,12 +113,7 @@ def get_details(input_uniqueids, handle, settings, fail_silently=False):
     details = configure_tmdb_artwork(details, settings)
 
     if settings.getSettingString('RatingS') == 'IMDb' or settings.getSettingBool('imdbanyway'):
-        imdbinfo = get_imdb_details(details['uniqueids'])
-        if 'error' in imdbinfo:
-            header = "The Movie Database Python error with website IMDB"
-            log(header + ': ' + imdbinfo['error'], xbmc.LOGWARNING)
-        else:
-            details = combine_scraped_details_info_and_ratings(details, imdbinfo)
+        log("IMDB ratings no longer work in Kodi Nexus.")
 
     if settings.getSettingString('RatingS') == 'Trakt' or settings.getSettingBool('traktanyway'):
         traktinfo = get_trakt_ratinginfo(details['uniqueids'])

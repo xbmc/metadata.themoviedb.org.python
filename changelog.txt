@@ -1,21 +1,11 @@
-unreleased
-- use script.module.imdbratings for IMDB ratings and votes
-- IMDB Top 250 is no longer available
-- try a failed request once more, honouring a 429's Retry-After (seconds or a date), with a 15
-  second timeout; API keys left out of the log
-- use TMDB's image address when its configuration can't be read
-- one TMDB request for a movie and one for its set, with the images in the add-on's language,
-  in English and without text; English only for text the chosen language lacks; a part that
-  still fails is left out and logged
-- fanart.tv and Trakt: a 404 is "nothing there"; a request that still fails leaves out its
-  part, logged
-- search: the title asked for first, then the year asked for, then the title exactly as asked;
-  page 2 in the search language
-- "Plan A" no longer searched as "Plan"
-- a set's TMDB details and fanart.tv art asked for once for its movies, not for each, and a
-  movie's once for its copies and editions while kept
-- one connection kept open to each site for the add-on's later calls, rather than a new
-  connection and TLS handshake for each request
+v3.3.0 (2026-11-28)
+- add timeout to all API requests
+- retry failed API requests, once
+- use fewer requests to fetch same data from TMDB
+- reuse network connections and cache API results
+- log failed partial requests, such as IMDB and trakt
+- improve search request and result display
+- Ignore IMDB ratings config
 
 v3.2.2 (2026-08-19)
 - Updated Czech and Chinese translations

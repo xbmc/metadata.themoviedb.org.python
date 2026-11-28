@@ -287,7 +287,7 @@
 					</constraints>
 					<dependencies>
 						<dependency type="enable" setting="add_tags" operator="is">true</dependency>
-						<dependency type="visible" setting="enable_tag_whitelist" operator="is">true</dependency>
+						<dependency type="enable" setting="enable_tag_whitelist" operator="is">true</dependency>
 					</dependencies>
 					<control type="list" format="string">
 						<multiselect>true</multiselect>
